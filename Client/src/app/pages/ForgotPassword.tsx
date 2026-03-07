@@ -67,6 +67,7 @@ export default function ForgotPassword() {
           </p>
           <Button 
             onClick={handleSignInClick}
+            tabIndex={-1}
             className="w-full h-[48px] rounded-[12px] font-medium cursor-pointer hover:opacity-90 transition-opacity"
             style={{ backgroundColor: "#2563EB", color: "#FFFFFF" }}
           >

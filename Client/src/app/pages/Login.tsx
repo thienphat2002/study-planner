@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router"; 
+import { authApi } from "../../api/authApi";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -19,9 +20,8 @@ export default function Login() {
   
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    
     let isValid = true;
 
     // Kiểm tra Email rỗng
@@ -44,6 +44,38 @@ export default function Login() {
     if (isValid) {
       console.log("Login with:", { email, password });
       navigate("/"); 
+    }
+    // Nếu người dùng đã nhập đủ thông tin thì bắt đầu gọi BE
+    if (isValid) {
+      try {
+        // 1. Gọi API gửi email & password đi
+        const response: any = await authApi.login({ email, password });
+        
+        console.log("Response từ BE trả về:", response);
+
+        // 2. Lấy dữ liệu token và user (Tùy thuộc vào cấu trúc BE của bạn trả về data nằm ở đâu)
+        const token = response.data?.token || response.token;
+        const user = response.data?.user || response.user;
+
+        if (token) {
+          // 3. Lưu vé đăng nhập vào trình duyệt
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user)); 
+          
+          // 4. Đẩy thẳng vào trang Dashboard
+          navigate("/"); 
+        }
+
+      } catch (error: any) {
+        // 5. Nếu BE báo lỗi (Sai mật khẩu, Email không tồn tại...)
+        console.error("Login Error:", error);
+        
+        // Lấy câu chửi của BE để hiện lên giao diện
+        const beErrorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
+        
+        // Bật chữ màu đỏ dưới ô mật khẩu
+        setPasswordError(beErrorMessage); 
+      }
     }
   };
 
@@ -137,6 +169,7 @@ export default function Login() {
                 />
                 <button
                   type="button"
+                  tabIndex={-1}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
                 >

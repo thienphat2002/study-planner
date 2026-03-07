@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
-// Giữ nguyên các import hiện tại của bạn
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { authApi } from "../../api/authApi";
 
 export default function Signup() {
   // Trạng thái hiển thị mật khẩu
@@ -25,7 +25,7 @@ export default function Signup() {
   const navigate = useNavigate();
 
   // Hàm xử lý khi bấm nút Đăng ký
-  const handleSubmit = (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     let isValid = true;
 
@@ -69,6 +69,37 @@ export default function Signup() {
     if (isValid) {
       console.log("Signup Info:", { fullName, email, password });
       // navigate("/login"); // Mở comment dòng này nếu bạn muốn tự động chuyển về trang đăng nhập
+    }
+    // NẾU HỢP LỆ THÌ GỌI API ĐĂNG KÝ
+    if (isValid) {
+      try {
+        // Đóng gói dữ liệu gửi xuống BE (không cần gửi confirmPassword)
+        const payload = {
+          fullName,
+          email,
+          password,
+          confirmPassword
+        };
+
+        // 1. Gọi API Đăng ký
+        const response: any = await authApi.register(payload);
+        console.log("Đăng ký thành công:", response);
+
+        // 2. Thông báo cho user biết
+        alert("Account created successfully! Please sign in.");
+
+        // 3. Chuyển hướng người dùng về trang Đăng nhập
+        navigate("/login"); 
+
+      } catch (error: any) {
+        console.error("Lỗi đăng ký:", error);
+        
+        // Bắt lỗi từ BE trả về (ví dụ: "Email đã tồn tại")
+        const beErrorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+        
+        // Hiển thị lỗi này dưới ô Email (vì thường đăng ký lỗi là do trùng Email)
+        setEmailError(beErrorMessage);
+      }
     }
   };
 
@@ -184,6 +215,7 @@ export default function Signup() {
                   />
                   <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
                   >
@@ -221,6 +253,7 @@ export default function Signup() {
                   />
                   <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
                   >
