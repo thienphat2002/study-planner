@@ -240,7 +240,7 @@ export default function Signup() {
                 type="submit"
                 className="w-full h-12 rounded-xl font-medium cursor-pointer hover:opacity-90 transition-opacity mt-2"
                 style={{ 
-                  backgroundColor: '#0EA5E9', // Đổi màu xanh giống nút Continue trong ảnh của bạn
+                  backgroundColor: '#2563EB', // Đổi màu xanh giống nút Continue trong ảnh của bạn
                   color: 'white'
                 }}
               >
@@ -288,8 +288,8 @@ export default function Signup() {
           <div 
             className="absolute inset-0 opacity-10"
             style={{
-              background: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80H10z' fill='none' stroke='white' stroke-width='2'/%3E%3Ccircle cx='50' cy='30' r='8' fill='white'/%3E%3Cpath d='M30 45h40M30 55h40M30 65h25' stroke='white' stroke-width='2'/%3E%3C/svg%3E")`,
-              backgroundSize: '200px 200px',
+              backgroundImage: `url('https://images.unsplash.com/photo-1769794370964-78412732f1cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwc3R1ZHklMjBkZXNrJTIwbGFwdG9wJTIwbm90ZWJvb2slMjBtaW5pbWFsfGVufDF8fHx8MTc3MjUyMTQ3Nnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')`,
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}

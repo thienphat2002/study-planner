@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Login from './pages/Login';
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
     {
     path: "/Signup",
     Component: Signup,
+    },
+    {
+      path:"/ForgotPassword",
+      Component: ForgotPassword,
     },
     {
     path: "/",

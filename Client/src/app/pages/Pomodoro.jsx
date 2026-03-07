@@ -1,18 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Settings } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings, X } from 'lucide-react'; // Import thêm icon X
 import Card from '../components/Card';
 import Button from '../components/Button';
 
 export default function Pomodoro() {
-  const [time, setTime] = useState(25 * 60); // 25 minutes in seconds
+  // 1. Thêm State để lưu trữ cài đặt thời gian (đơn vị: phút)
+  const [durations, setDurations] = useState({
+    focus: 25,
+    shortBreak: 5,
+    longBreak: 15,
+  });
+
+  // 2. Các State cơ bản giữ nguyên, nhưng lấy giá trị khởi tạo từ durations
+  const [time, setTime] = useState(durations.focus * 60); 
   const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState('focus'); // focus, shortBreak, longBreak
+  const [mode, setMode] = useState('focus'); 
   const [sessions, setSessionsCompleted] = useState(0);
 
+  // 3. State cho cửa sổ Settings
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempDurations, setTempDurations] = useState(durations);
+
+  // 4. Biến modes động hóa theo State durations
   const modes = {
-    focus: { duration: 25 * 60, label: 'Focus Time', color: '#2563EB' },
-    shortBreak: { duration: 5 * 60, label: 'Short Break', color: '#22C55E' },
-    longBreak: { duration: 15 * 60, label: 'Long Break', color: '#7C3AED' },
+    focus: { duration: durations.focus * 60, label: 'Focus Time', color: '#2563EB' },
+    shortBreak: { duration: durations.shortBreak * 60, label: 'Short Break', color: '#22C55E' },
+    longBreak: { duration: durations.longBreak * 60, label: 'Long Break', color: '#7C3AED' },
   };
 
   useEffect(() => {
@@ -47,21 +60,36 @@ export default function Pomodoro() {
     setIsRunning(false);
   };
 
+  // 5. Hàm lưu cài đặt
+  const handleSaveSettings = () => {
+    setDurations(tempDurations); // Cập nhật thời gian mới
+    setTime(tempDurations[mode] * 60); // Cập nhật luôn đồng hồ hiện tại
+    setIsRunning(false); // Dừng đồng hồ để tránh nhảy số
+    setShowSettings(false); // Đóng modal
+  };
+
+  // Mở settings thì copy dữ liệu thật sang dữ liệu tạm
+  const handleOpenSettings = () => {
+    setTempDurations(durations);
+    setShowSettings(true);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <div className="flex items-center justify-between">
         <div>
           <h1>Pomodoro Timer</h1>
           <p className="text-[16px] text-[#6B7280] mt-2">Stay focused and productive with the Pomodoro Technique</p>
         </div>
-        <Button variant="outline">
+        {/* Sửa nút Settings để mở Modal */}
+        <Button variant="outline" onClick={handleOpenSettings}>
           <Settings className="w-5 h-5 mr-2" />
           Settings
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Timer */}
+        {/* Timer Card */}
         <Card className="lg:col-span-2 p-12">
           {/* Mode Selector */}
           <div className="flex justify-center gap-4 mb-12">
@@ -84,24 +112,12 @@ export default function Pomodoro() {
           {/* Circular Timer */}
           <div className="flex items-center justify-center mb-12">
             <div className="relative">
-              {/* Background Circle */}
               <svg className="w-80 h-80 transform -rotate-90">
                 <circle
-                  cx="160"
-                  cy="160"
-                  r="140"
-                  stroke="#F8FAFC"
-                  strokeWidth="12"
-                  fill="none"
+                  cx="160" cy="160" r="140" stroke="#F8FAFC" strokeWidth="12" fill="none"
                 />
-                {/* Progress Circle */}
                 <circle
-                  cx="160"
-                  cy="160"
-                  r="140"
-                  stroke={modes[mode].color}
-                  strokeWidth="12"
-                  fill="none"
+                  cx="160" cy="160" r="140" stroke={modes[mode].color} strokeWidth="12" fill="none"
                   strokeDasharray={`${2 * Math.PI * 140}`}
                   strokeDashoffset={`${2 * Math.PI * 140 * (1 - progress / 100)}`}
                   strokeLinecap="round"
@@ -109,7 +125,6 @@ export default function Pomodoro() {
                 />
               </svg>
               
-              {/* Time Display */}
               <div className="absolute inset-0 flex items-center justify-center flex-col">
                 <div className="text-[72px] font-bold text-[#111827] tabular-nums">
                   {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
@@ -124,40 +139,22 @@ export default function Pomodoro() {
           {/* Controls */}
           <div className="flex items-center justify-center gap-4">
             {!isRunning ? (
-              <Button 
-                variant="primary" 
-                size="lg" 
-                onClick={handleStart}
-                className="px-12"
-              >
-                <Play className="w-6 h-6 mr-2" />
-                Start
+              <Button variant="primary" size="lg" onClick={handleStart} className="px-12">
+                <Play className="w-6 h-6 mr-2" /> Start
               </Button>
             ) : (
-              <Button 
-                variant="warning" 
-                size="lg" 
-                onClick={handlePause}
-                className="px-12"
-              >
-                <Pause className="w-6 h-6 mr-2" />
-                Pause
+              <Button variant="warning" size="lg" onClick={handlePause} className="px-12">
+                <Pause className="w-6 h-6 mr-2" /> Pause
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              size="lg" 
-              onClick={handleReset}
-            >
-              <RotateCcw className="w-6 h-6 mr-2" />
-              Reset
+            <Button variant="outline" size="lg" onClick={handleReset}>
+              <RotateCcw className="w-6 h-6 mr-2" /> Reset
             </Button>
           </div>
         </Card>
 
-        {/* Stats & Info */}
+        {/* Stats & Info - Giữ nguyên không đổi */}
         <div className="space-y-6">
-          {/* Sessions Completed */}
           <Card className="p-6">
             <h3 className="text-[16px] font-semibold text-[#111827] mb-4">Today's Sessions</h3>
             <div className="text-center py-6">
@@ -166,17 +163,11 @@ export default function Pomodoro() {
             </div>
             <div className="grid grid-cols-4 gap-2 mt-4">
               {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-2 rounded-full ${
-                    i < sessions ? 'bg-[#2563EB]' : 'bg-[#F8FAFC]'
-                  }`}
-                ></div>
+                <div key={i} className={`h-2 rounded-full ${i < sessions ? 'bg-[#2563EB]' : 'bg-[#F8FAFC]'}`}></div>
               ))}
             </div>
           </Card>
 
-          {/* How it Works */}
           <Card className="p-6">
             <h3 className="text-[16px] font-semibold text-[#111827] mb-4">How it Works</h3>
             <div className="space-y-4">
@@ -210,7 +201,6 @@ export default function Pomodoro() {
             </div>
           </Card>
 
-          {/* Current Task */}
           <Card className="p-6">
             <h3 className="text-[16px] font-semibold text-[#111827] mb-4">Current Task</h3>
             <div className="p-4 bg-[#F8FAFC] rounded-[8px]">
@@ -223,6 +213,64 @@ export default function Pomodoro() {
           </Card>
         </div>
       </div>
+
+      {/* GIAO DIỆN MODAL SETTINGS */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <Card className="p-6 w-full max-w-md bg-white shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-[#111827]">Timer Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="text-[#6B7280] hover:text-[#111827]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">Focus Time (minutes)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  value={tempDurations.focus}
+                  onChange={(e) => setTempDurations({...tempDurations, focus: Number(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">Short Break (minutes)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  value={tempDurations.shortBreak}
+                  onChange={(e) => setTempDurations({...tempDurations, shortBreak: Number(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22C55E]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">Long Break (minutes)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  value={tempDurations.longBreak}
+                  onChange={(e) => setTempDurations({...tempDurations, longBreak: Number(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSettings(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSaveSettings}>
+                Save Changes
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
