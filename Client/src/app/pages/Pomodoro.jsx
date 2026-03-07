@@ -214,7 +214,7 @@ export default function Pomodoro() {
         </div>
       </div>
 
-      {/* GIAO DIỆN MODAL SETTINGS */}
+      {/* MODAL SETTINGS */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
           <Card className="p-6 w-full max-w-md bg-white shadow-2xl">
