@@ -50,30 +50,23 @@ export default function Login() {
       try {
         // 1. Gọi API gửi email & password đi
         const response: any = await authApi.login({ email, password });
-        
-        console.log("Response từ BE trả về:", response);
+        const resData = response.data || response; 
 
-        // 2. Lấy dữ liệu token và user (Tùy thuộc vào cấu trúc BE của bạn trả về data nằm ở đâu)
-        const token = response.data?.token || response.token;
-        const user = response.data?.user || response.user;
-
-        if (token) {
-          // 3. Lưu vé đăng nhập vào trình duyệt
-          localStorage.setItem("token", token);
-          localStorage.setItem("user", JSON.stringify(user)); 
-          
-          // 4. Đẩy thẳng vào trang Dashboard
-          navigate("/"); 
+        if (resData.token) {
+          const userToSave = {
+            fullName: resData.user?.fullName || "User",
+            email: resData.email,
+            createdAt: resData.createdAt
+          };
+          localStorage.setItem("token", resData.token);
+          localStorage.setItem("user", JSON.stringify(userToSave)); 
+          window.dispatchEvent(new Event('profileUpdated'));
+          navigate("/");
         }
 
       } catch (error: any) {
-        // 5. Nếu BE báo lỗi (Sai mật khẩu, Email không tồn tại...)
         console.error("Login Error:", error);
-        
-        // Lấy câu chửi của BE để hiện lên giao diện
         const beErrorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
-        
-        // Bật chữ màu đỏ dưới ô mật khẩu
         setPasswordError(beErrorMessage); 
       }
     }

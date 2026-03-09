@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] transition-colors duration-300">
       <Navbar />
       <Sidebar />
       

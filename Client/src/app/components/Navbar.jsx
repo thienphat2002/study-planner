@@ -16,9 +16,7 @@ export default function Navbar() {
   // Lấy dữ liệu người dùng khi vừa load trang
   useEffect(() => {
     const loadUserData = () => {
-      // Ưu tiên 1: Lấy dữ liệu đã chỉnh sửa trong Profile (nếu có)
       const editedProfile = localStorage.getItem('userProfile');
-      // Ưu tiên 2: Lấy dữ liệu gốc từ DB lúc Đăng nhập
       const loginUser = localStorage.getItem('user');
 
       if (editedProfile) {
@@ -28,7 +26,6 @@ export default function Navbar() {
         const parsedDB = JSON.parse(loginUser);
         const fullName = parsedDB.fullName || 'User';
         
-        // Tự động tạo 2 chữ cái viết tắt (VD: Thiên Phát -> TP)
         const nameParts = fullName.trim().split(' ');
         let initials = 'U';
         if (nameParts.length >= 2) {
@@ -42,7 +39,6 @@ export default function Navbar() {
     };
 
     loadUserData(); 
-    // Lắng nghe chuông báo khi Profile cập nhật
     window.addEventListener('profileUpdated', loadUserData);
     return () => window.removeEventListener('profileUpdated', loadUserData);
   }, []);
@@ -50,21 +46,21 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("userProfile"); // Xóa luôn lịch sử edit profile
+    localStorage.removeItem("userProfile"); 
     navigate("/login");
   };
 
   return (
-    <nav className="h-16 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-8 fixed top-0 left-0 right-0 z-40">
+    <nav className="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E5E7EB] dark:border-[#334155] flex items-center justify-between px-8 fixed top-0 left-0 right-0 z-40 transition-colors duration-300">
       <div className="flex items-center gap-6">
-        <h1 className="text-[20px] font-semibold text-[#111827]">Smart Study Planner</h1>
+        <h1 className="text-[20px] font-semibold text-[#111827] dark:text-white transition-colors">Smart Study Planner</h1>
       </div>
       
       <div className="flex items-center gap-4">
         
         {/* Notifications */}
-        <button className="relative p-2 hover:bg-[#F8FAFC] rounded-[8px] transition-colors">
-          <Bell className="w-5 h-5 text-[#6B7280]" />
+        <button className="relative p-2 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer">
+          <Bell className="w-5 h-5 text-[#6B7280] dark:text-[#94A3B8]" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-[#EF4444] rounded-full"></span>
         </button>
         
@@ -72,7 +68,7 @@ export default function Navbar() {
           {/* Profile */}
           <Link 
             to="/profile" 
-            className="flex items-center gap-2 py-1 px-2 hover:bg-[#F8FAFC] rounded-[8px] transition-colors cursor-pointer"
+            className="flex items-center gap-2 py-1 px-2 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 bg-[#2563EB] rounded-full flex items-center justify-center overflow-hidden">
               {userData.avatarUrl ? (
@@ -81,7 +77,7 @@ export default function Navbar() {
                 <span className="text-[14px] font-medium text-white">{userData.avatar}</span>
               )}
             </div>
-            <span className="text-[14px] font-medium text-[#111827] pr-1">
+            <span className="text-[14px] font-medium text-[#111827] dark:text-white pr-1 transition-colors">
               {userData.name}
             </span>
           </Link>
@@ -89,7 +85,7 @@ export default function Navbar() {
           {/* Log out */}
           <button 
             onClick={handleLogout}
-            className="p-2 text-[#EF4444] hover:bg-[#FEF2F2] rounded-[8px] transition-colors cursor-pointer ml-1"
+            className="p-2 text-[#EF4444] hover:bg-[#FEF2F2] dark:hover:bg-[#EF4444]/10 rounded-[8px] transition-colors cursor-pointer ml-1"
             title="Logout"
           >
             <LogOut className="w-5 h-5" />

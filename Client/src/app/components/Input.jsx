@@ -5,9 +5,9 @@ export default function Input({
   ...props 
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full">
       {label && (
-        <label className="block text-[14px] font-medium text-[#111827]">
+        <label className="block text-[14px] font-medium text-[#111827] dark:text-white transition-colors">
           {label}
         </label>
       )}
@@ -15,19 +15,22 @@ export default function Input({
         className={`
           w-full 
           px-4 
-          py-2 
-          bg-white 
+          py-2.5 
+          bg-white dark:bg-[#0F172A] 
           border 
-          border-[#E5E7EB] 
+          border-[#E5E7EB] dark:border-[#334155] 
           rounded-[8px] 
-          text-[16px]
+          text-[15px]
+          text-[#111827] dark:text-white
+          placeholder:text-[#94A3B8] dark:placeholder:text-[#64748B]
           focus:outline-none 
           focus:ring-2 
-          focus:ring-[#2563EB] 
-          focus:border-transparent
-          disabled:bg-[#F8FAFC]
+          focus:ring-[#2563EB]/30 dark:focus:ring-[#2563EB]/50
+          focus:border-[#2563EB] dark:focus:border-[#2563EB]
+          disabled:bg-[#F8FAFC] dark:disabled:bg-[#1E293B]
           disabled:cursor-not-allowed
-          ${error ? 'border-[#EF4444] focus:ring-[#EF4444]' : ''}
+          transition-colors
+          ${error ? '!border-[#EF4444] focus:!ring-[#EF4444]' : ''}
           ${className}
         `}
         {...props}
