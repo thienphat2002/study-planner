@@ -532,12 +532,18 @@ export default function Tasks() {
                   </select>
                 </div>
 
-                <Input 
-                  label="Due Date" 
-                  type="datetime-local" 
-                  value={newTaskDeadline}
-                  onChange={(e) => setNewTaskDeadline(e.target.value)}
-                />
+                {/* --- Ô CHỌN NGÀY ĐÃ ĐƯỢC FIX LỖI --- */}
+                <div className="space-y-2">
+                  <label className="block text-[14px] font-medium text-[#111827] dark:text-white transition-colors">
+                    Due Date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={newTaskDeadline}
+                    onChange={(e) => setNewTaskDeadline(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 dark:focus:ring-[#2563EB]/50 focus:border-[#2563EB] transition-colors cursor-pointer dark:[color-scheme:dark]"
+                  />
+                </div>
               </div>
 
               <Input 

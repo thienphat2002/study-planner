@@ -48,7 +48,7 @@ export default function Calendar() {
   const TOP_OFFSET = 30;  
   
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNamesShort = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; 
+  const dayNamesShort = ['Mon', 'Tue', 'Wed', 'Tue', 'Fri', 'Sat', 'Sun']; 
   const dayNamesFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   // --- HELPER SHOW TOAST ---

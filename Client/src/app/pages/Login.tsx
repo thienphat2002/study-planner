@@ -1,30 +1,31 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router"; 
 import { authApi } from "../../api/authApi";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
 
 export default function Login() {
+  // ÉP TRANG NÀY LUÔN Ở LIGHT MODE
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
-  
-  // State lưu giá trị nhập vào
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // State lưu thông báo lỗi
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   
   const navigate = useNavigate();
 
+  // FIX LỖI TYPESCRIPT BẰNG CÁCH THÊM ": React.SyntheticEvent"
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     let isValid = true;
 
-    // Kiểm tra Email rỗng
     if (!email.trim()) {
       setEmailError("Field is required");
       isValid = false;
@@ -32,7 +33,6 @@ export default function Login() {
       setEmailError("");
     }
 
-    // Kiểm tra Password rỗng
     if (!password.trim()) {
       setPasswordError("Field is required");
       isValid = false;
@@ -40,15 +40,8 @@ export default function Login() {
       setPasswordError("");
     }
 
-    // Nếu không có lỗi (isValid = true) thì mới xử lý đăng nhập và chuyển trang
-    if (isValid) {
-      console.log("Login with:", { email, password });
-      navigate("/"); 
-    }
-    // Nếu người dùng đã nhập đủ thông tin thì bắt đầu gọi BE
     if (isValid) {
       try {
-        // 1. Gọi API gửi email & password đi
         const response: any = await authApi.login({ email, password });
         const resData = response.data || response; 
 
@@ -63,7 +56,6 @@ export default function Login() {
           window.dispatchEvent(new Event('profileUpdated'));
           navigate("/");
         }
-
       } catch (error: any) {
         console.error("Login Error:", error);
         const beErrorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
@@ -73,9 +65,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8FAFC" }}>
+    <div className="min-h-screen flex items-center justify-center !bg-[#F8FAFC]">
       <div 
-        className="bg-white overflow-hidden flex"
+        className="!bg-white overflow-hidden flex"
         style={{
           width: "1100px",
           height: "600px",
@@ -83,31 +75,26 @@ export default function Login() {
           boxShadow: "0px 10px 30px rgba(0,0,0,0.08)"
         }}
       >
-        {/* Left Panel - Login Form */}
-        <div className="w-1/2 flex flex-col" style={{ padding: "48px" }}>
+        <div className="w-1/2 flex flex-col !bg-white" style={{ padding: "48px" }}>
           <div className="mb-8">
-            <h1 className="text-[24px] font-bold" style={{ color: "#2563EB" }}>
+            <h1 className="text-[24px] font-bold !text-[#2563EB]">
               Smart Study Planner
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6 flex-1">
             <div className="space-y-2">
-              <h2 className="text-[32px] font-bold" style={{ color: "#111827" }}>
+              <h2 className="text-[32px] font-bold !text-[#111827]">
                 Sign in
               </h2>
-              <p className="text-[16px]" style={{ color: "#6B7280" }}>
+              <p className="text-[16px] !text-[#6B7280]">
                 Built for busy students like you.
               </p>
             </div>
 
             {/* Email Input */}
             <div className="space-y-2">
-              <label 
-                htmlFor="email" 
-                className="text-[14px] font-medium block"
-                style={{ color: "#374151" }}
-              >
+              <label htmlFor="email" className="text-[14px] font-medium block !text-[#374151]">
                 Email
               </label>
               <Input
@@ -116,28 +103,24 @@ export default function Login() {
                 placeholder="Enter your email"
                 value={email}
                 label=""
-                // Truyền state lỗi vào đây
                 error={emailError} 
                 onChange={(e: any) => {
                   setEmail(e.target.value);
-                  // Xóa lỗi ngay khi người dùng bắt đầu nhập
                   if (e.target.value) setEmailError(""); 
                 }}
-                className={`h-[48px] rounded-[12px] ${emailError ? "border-red-500" : ""}`}
+                className={`h-[48px] rounded-[12px] border ${emailError ? "border-red-500" : ""}`}
                 style={{ 
                   borderColor: emailError ? "#EF4444" : "#E5E7EB",
-                  backgroundColor: "#FFFFFF"
+                  backgroundColor: "#FFFFFF",
+                  color: "#111827" 
                 }}
               />
+              {emailError && <p className="text-[#EF4444] text-[14px] mt-1">{emailError}</p>}
             </div>
 
             {/* Password Input */}
             <div className="space-y-2">
-              <label 
-                htmlFor="password" 
-                className="text-[14px] font-medium block"
-                style={{ color: "#374151" }}
-              >
+              <label htmlFor="password" className="text-[14px] font-medium block !text-[#374151]">
                 Password
               </label>
               <div className="relative">
@@ -147,66 +130,48 @@ export default function Login() {
                   placeholder="Enter password"
                   value={password}
                   label=""
-                  // Truyền state lỗi vào đây
                   error={passwordError} 
                   onChange={(e: any) => {
                     setPassword(e.target.value);
-                    // Xóa lỗi ngay khi người dùng bắt đầu nhập
                     if (e.target.value) setPasswordError("");
                   }}
-                  className={`h-[48px] rounded-[12px] pr-12 ${passwordError ? "border-red-500" : ""}`}
+                  className={`h-[48px] rounded-[12px] border pr-12 ${passwordError ? "border-red-500" : ""}`}
                   style={{ 
                     borderColor: passwordError ? "#EF4444" : "#E5E7EB",
-                    backgroundColor: "#FFFFFF"
+                    backgroundColor: "#FFFFFF",
+                    color: "#111827" 
                   }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
+                  className="absolute right-3 top-[24px] -translate-y-1/2 !text-gray-500 hover:!text-gray-700 z-10 cursor-pointer"
                 >
-                  {showPassword ? (
-                    <EyeOff className="size-5" />
-                  ) : (
-                    <Eye className="size-5" />
-                  )}
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
+              {passwordError && <p className="text-[#EF4444] text-[14px] mt-1">{passwordError}</p>}
             </div>
 
-            {/* Forgot Password Link */}
             <div className="flex justify-end -mt-2">
-              <Link 
-                to="/forgotpassword" 
-                className="text-[14px] font-medium hover:underline transition-all"
-                style={{ color: '#2563EB' }}
-              >
+              <Link to="/forgotpassword" className="text-[14px] font-medium hover:underline transition-all !text-[#2563EB]">
                 Forgot password?
               </Link>
             </div>
 
-            {/* Login Button */}
             <Button
               type="submit"
               className="w-full h-[48px] rounded-[12px] font-medium cursor-pointer hover:opacity-90 transition-opacity"
-              style={{
-                backgroundColor: "#2563EB",
-                color: "#FFFFFF"
-              }}
+              style={{ backgroundColor: "#2563EB", color: "#FFFFFF" }}
             >
               Continue
             </Button>
 
-            {/* Sign Up Link */}
             <div className="text-center">
-              <p className="text-sm">
-                <span style={{ color: '#6B7280' }}>Don't have an account? </span>
-                <Link 
-                  to="/signup" 
-                  className="font-medium hover:underline transition-all"
-                  style={{ color: '#2563EB' }}
-                >
+              <p className="text-sm !text-[#6B7280]">
+                Don't have an account?{' '}
+                <Link to="/signup" className="font-medium hover:underline transition-all !text-[#2563EB]">
                   Sign up
                 </Link>
               </p>
@@ -214,13 +179,9 @@ export default function Login() {
           </form>
         </div>
 
-        {/* Right Panel - Hero Section */}
         <div 
           className="w-1/2 flex flex-col items-center justify-center text-center p-12 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
-            borderRadius: "24px"
-          }}
+          style={{ background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)", borderRadius: "24px" }}
         >
           <div 
             className="absolute inset-0 opacity-10"
@@ -230,18 +191,11 @@ export default function Login() {
               backgroundPosition: "center"
             }}
           />
-          
           <div className="relative z-10 space-y-4 max-w-md">
-            <h3 
-              className="text-[28px] font-bold leading-snug"
-              style={{ color: "#FFFFFF" }}
-            >
+            <h3 className="text-[28px] font-bold leading-snug !text-[#FFFFFF]">
               Manage your classes, tasks and exams easily.
             </h3>
-            <p 
-              className="text-[16px]"
-              style={{ color: "rgba(255, 255, 255, 0.8)" }}
-            >
+            <p className="text-[16px] text-white/80">
               Plan your study schedule and stay organized.
             </p>
           </div>

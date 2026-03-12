@@ -1,19 +1,45 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Settings, X, Save, Loader2 } from 'lucide-react'; 
+import { Play, Pause, RotateCcw, Settings, X, Save, Loader2, Target, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react'; 
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Input from '../components/Input'; 
 
 export default function Pomodoro() {
   const [durations, setDurations] = useState({ focus: 25, shortBreak: 5, longBreak: 15 });
   const [time, setTime] = useState(durations.focus * 60); 
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState('focus'); 
-  const [sessions, setSessionsCompleted] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [tempDurations, setTempDurations] = useState(durations);
   
-  // --- STATE CHỜ API LƯU ---
+  // --- 1. STATE SESSIONS ĐƯỢC NÂNG CẤP ĐỂ NHỚ DỮ LIỆU ---
+  const [sessions, setSessionsCompleted] = useState(() => {
+    const savedData = localStorage.getItem('dailyPomodoro');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // Kiểm tra xem data lưu có phải của ngày hôm nay không
+      if (parsed.date === new Date().toLocaleDateString()) {
+        return parsed.count; // Nếu đúng hôm nay, trả về số cũ
+      }
+    }
+    return 0; // Nếu là ngày mới hoặc chưa có data, reset về 0
+  });
+
+  // Tự động lưu vào Local Storage mỗi khi sessions thay đổi
+  useEffect(() => {
+    localStorage.setItem('dailyPomodoro', JSON.stringify({
+      count: sessions,
+      date: new Date().toLocaleDateString()
+    }));
+  }, [sessions]);
+  // --------------------------------------------------------
+
+  // --- STATE CUSTOM NOTIFICATIONS (TOAST) ---
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  // --- STATE QUẢN LÝ TASK ---
+  const [tasks, setTasks] = useState([]); 
+  const [selectedTaskId, setSelectedTaskId] = useState(''); 
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const modes = {
@@ -22,8 +48,43 @@ export default function Pomodoro() {
     longBreak: { duration: durations.longBreak * 60, label: 'Long Break', color: '#7C3AED' },
   };
 
+  // --- HELPER SHOW TOAST ---
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 4000); 
+  };
+
+  // --- FETCH DANH SÁCH TASK KHI VÀO TRANG ---
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/tasks/getTask', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const activeTasks = data.filter(t => t.status !== 'DONE');
+          setTasks(activeTasks);
+        }
+      } catch (error) {
+        console.error("Lỗi lấy danh sách task:", error);
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
+    fetchTasks();
+  }, []);
+
   // --- HÀM GỌI API LƯU THỜI GIAN HỌC VÀO DB ---
   const saveStudySessionToDB = async (durationInMinutes) => {
+    if (!selectedTaskId) {
+      showToast("Please select a task to save the session.", "warning");
+      return; 
+    }
+
     setIsSaving(true);
     const token = localStorage.getItem('token');
     
@@ -35,19 +96,18 @@ export default function Pomodoro() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          // Gửi số phút học thực tế (ví dụ: 25 phút). Bạn có thể điều chỉnh body này nếu Backend yêu cầu trường dữ liệu khác.
-          durationMinutes: durationInMinutes,
-          sessionType: 'Pomodoro Focus' 
+          taskId: selectedTaskId,
+          duration: durationInMinutes 
         })
       });
 
       if (!response.ok) {
-        console.error("Lỗi khi lưu thời gian học vào DB");
+        showToast("Failed to save study session", "error");
       } else {
-        console.log(`Đã lưu ${durationInMinutes} phút học vào Database!`);
+        showToast(`Awesome! ${durationInMinutes} mins saved to your task.`, "success");
       }
     } catch (error) {
-      console.error("Lỗi kết nối server khi lưu thời gian:", error);
+      showToast("Server connection error", "error");
     } finally {
       setIsSaving(false);
     }
@@ -59,34 +119,36 @@ export default function Pomodoro() {
     if (isRunning && time > 0) {
       interval = setInterval(() => setTime(t => t - 1), 1000);
     } else if (isRunning && time === 0) {
-      // KHI ĐỒNG HỒ ĐẾM NGƯỢC VỀ 0
       setIsRunning(false); 
       
-      // Nếu là chế độ Focus, cộng thêm 1 session và GỌI API LƯU DB
       if (mode === 'focus') {
         setSessionsCompleted(s => s + 1);
-        saveStudySessionToDB(durations.focus); // Gọi API lưu số phút
+        saveStudySessionToDB(durations.focus); 
         
-        // Tự động chuyển sang nghỉ ngắn (hoặc nghỉ dài nếu đã đủ 4 pomodoro)
         if ((sessions + 1) % 4 === 0) {
            handleModeChange('longBreak');
         } else {
            handleModeChange('shortBreak');
         }
       } else {
-        // Nếu vừa nghỉ xong, tự động quay lại chế độ Focus
         handleModeChange('focus');
       }
     }
     
     return () => clearInterval(interval);
-  }, [isRunning, time, mode, sessions, durations.focus]); // Thêm dependencies đầy đủ
+  }, [isRunning, time, mode, sessions, durations.focus, selectedTaskId]); 
 
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
   const progress = ((modes[mode].duration - time) / modes[mode].duration) * 100;
 
-  const handleStart = () => setIsRunning(true);
+  const handleStart = () => {
+    if (mode === 'focus' && !selectedTaskId) {
+      return showToast("Please select a task to focus on before starting!", "warning");
+    }
+    setIsRunning(true);
+  };
+  
   const handlePause = () => setIsRunning(false);
   const handleReset = () => { setIsRunning(false); setTime(modes[mode].duration); };
   
@@ -101,6 +163,7 @@ export default function Pomodoro() {
     setTime(tempDurations[mode] * 60); 
     setIsRunning(false); 
     setShowSettings(false); 
+    showToast("Timer settings saved!", "success");
   };
   
   const handleOpenSettings = () => { 
@@ -110,6 +173,24 @@ export default function Pomodoro() {
 
   return (
     <div className="space-y-6 relative">
+      
+      {/* --- CUSTOM COMPONENT: TOAST NOTIFICATION --- */}
+      {toast.show && (
+        <div className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-5 py-4 rounded-[12px] shadow-2xl animate-in slide-in-from-right-8 fade-in duration-300 ${
+          toast.type === 'error' ? 'bg-red-500 text-white' : 
+          toast.type === 'warning' ? 'bg-amber-500 text-white' : 
+          'bg-[#10B981] text-white'
+        }`}>
+          {toast.type === 'error' ? <AlertCircle size={22} /> : 
+           toast.type === 'warning' ? <AlertTriangle size={22} /> : 
+           <CheckCircle2 size={22} />}
+          <span className="font-medium text-[14px] pr-2">{toast.message}</span>
+          <button onClick={() => setToast({ show: false, message: '', type: 'success' })} className="ml-auto opacity-70 hover:opacity-100 cursor-pointer">
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="dark:text-white">Pomodoro Timer</h1>
@@ -124,17 +205,40 @@ export default function Pomodoro() {
         </button>
       </div>
 
-      {/* HIỂN THỊ DẤU HIỆU ĐANG LƯU DỮ LIỆU */}
       {isSaving && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-4 py-2 rounded-full text-sm font-medium flex items-center shadow-sm animate-in slide-in-from-top-4">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-4 py-2 rounded-full text-sm font-medium flex items-center shadow-sm animate-in slide-in-from-top-4 z-50">
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           Saving session to Dashboard...
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-        <Card className="lg:col-span-2 p-12 relative overflow-hidden">
-          <div className="flex justify-center gap-4 mb-12">
+        <Card className="lg:col-span-2 p-8 relative overflow-hidden flex flex-col items-center">
+          
+          <div className="w-full max-w-md mb-8">
+            <label className="block text-[14px] font-bold text-[#111827] dark:text-white mb-2 flex items-center justify-center gap-2">
+              <Target className="w-4 h-4 text-[#2563EB]" /> What are you working on?
+            </label>
+            <select
+              value={selectedTaskId}
+              onChange={(e) => setSelectedTaskId(e.target.value)}
+              disabled={isRunning} 
+              className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#E5E7EB] dark:border-[#334155] rounded-[12px] text-[#111827] dark:text-white focus:outline-none focus:ring-0 focus:border-[#2563EB] transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <option value="" disabled>-- Select a task to focus on --</option>
+              {loadingTasks ? (
+                <option disabled>Loading tasks...</option>
+              ) : (
+                tasks.map(task => (
+                  <option key={task.id} value={task.id}>
+                    {task.title} {task.subject?.name ? `(${task.subject.name})` : ''}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+
+          <div className="flex justify-center gap-4 mb-8">
             {Object.entries(modes).map(([key, { label, color }]) => (
               <button
                 key={key}
@@ -164,13 +268,13 @@ export default function Pomodoro() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4 w-full max-w-md">
             {!isRunning ? (
-              <Button variant="primary" size="lg" onClick={handleStart} className="px-12 hover:scale-105 transition-transform cursor-pointer" style={{ backgroundColor: modes[mode].color, borderColor: modes[mode].color }}>
+              <Button variant="primary" size="lg" onClick={handleStart} className="flex-1 hover:scale-105 transition-transform cursor-pointer" style={{ backgroundColor: modes[mode].color, borderColor: modes[mode].color }}>
                 <Play className="w-6 h-6 mr-2 fill-current" /> Start
               </Button>
             ) : (
-              <Button variant="warning" size="lg" onClick={handlePause} className="px-12 hover:scale-105 transition-transform cursor-pointer" style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: 'white' }}>
+              <Button variant="warning" size="lg" onClick={handlePause} className="flex-1 hover:scale-105 transition-transform cursor-pointer" style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: 'white' }}>
                 <Pause className="w-6 h-6 mr-2 fill-current" /> Pause
               </Button>
             )}
@@ -178,16 +282,16 @@ export default function Pomodoro() {
               variant="outline" 
               size="lg" 
               onClick={handleReset} 
-              className="cursor-pointer hover:bg-[#F8FAFC] dark:!bg-transparent dark:hover:!bg-[#334155] dark:!border-[#475569] dark:!text-white transition-colors"
+              className="px-8 cursor-pointer hover:bg-[#F8FAFC] dark:!bg-transparent dark:hover:!bg-[#334155] dark:!border-[#475569] dark:!text-white transition-colors"
             >
-              <RotateCcw className="w-6 h-6 mr-2" /> Reset
+              <RotateCcw className="w-6 h-6" />
             </Button>
           </div>
         </Card>
 
         <div className="space-y-6">
           <Card className="p-6">
-            <h3 className="text-[16px] font-semibold text-[#111827] dark:text-white mb-4">Today's Sessions</h3>
+            <h3 className="text-[16px] font-semibold text-[#111827] dark:text-white mb-4">Daily Goal</h3>
             <div className="text-center py-6">
               <div className="text-[56px] font-bold text-[#2563EB] dark:text-[#60A5FA] mb-1 leading-none">{sessions}</div>
               <p className="text-[14px] text-[#6B7280] dark:text-[#94A3B8] font-medium">Completed Sessions</p>
@@ -207,8 +311,8 @@ export default function Pomodoro() {
                   <span className="text-[14px] font-bold text-[#2563EB] dark:text-[#60A5FA]">1</span>
                 </div>
                 <div>
-                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Focus for 25 minutes</p>
-                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">Work on a single task</p>
+                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Select a Task</p>
+                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">Choose what to focus on</p>
                 </div>
               </div>
               <div className="flex gap-4 items-start">
@@ -216,8 +320,8 @@ export default function Pomodoro() {
                   <span className="text-[14px] font-bold text-[#22C55E] dark:text-[#4ade80]">2</span>
                 </div>
                 <div>
-                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Take a 5-minute break</p>
-                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">Relax and recharge</p>
+                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Focus for 25 minutes</p>
+                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">Time will be saved automatically</p>
                 </div>
               </div>
               <div className="flex gap-4 items-start">
@@ -225,8 +329,8 @@ export default function Pomodoro() {
                   <span className="text-[14px] font-bold text-[#7C3AED] dark:text-[#a78bfa]">3</span>
                 </div>
                 <div>
-                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">After 4 sessions</p>
-                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">Take a 15-minute break</p>
+                  <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Take a break</p>
+                  <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">5 mins short, 15 mins long</p>
                 </div>
               </div>
             </div>
