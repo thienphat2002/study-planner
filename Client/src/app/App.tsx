@@ -1,24 +1,30 @@
-import { RouterProvider } from 'react-router';
-import { router } from './routes';
-import { useEffect } from 'react'; // 1. Import thêm useEffect
+import { RouterProvider } from "react-router";
+import { router } from "./routes";
+// Import nút Install (Bạn nhớ kiểm tra lại đường dẫn file này cho khớp với thư mục của bạn nhé)
+import InstallPrompt from "./components/InstallPrompt";
+// Import hàm đăng ký PWA
+import { registerSW } from "virtual:pwa-register";
+
+// 1. Kích hoạt Service Worker để app chạy được Offline
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm("Có phiên bản mới của ứng dụng. Bạn có muốn tải lại trang?")) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log("App đã sẵn sàng hoạt động offline!");
+  },
+});
 
 export default function App() {
-  
-  // 2. Thêm bộ não kiểm tra Dark Mode ở đây
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('userSettings');
-    
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      
-      // Kiểm tra xem trong settings đã lưu 'dark' chưa
-      if (parsed.appearance === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  }, []); // [] giúp logic này chạy 1 lần duy nhất khi load trang
+  return (
+    <>
+      {/* 2. Giữ nguyên hệ thống Routing của bạn */}
+      <RouterProvider router={router} />
 
-  return <RouterProvider router={router} />;
+      {/* 3. Chèn nút hiển thị Cài đặt PWA (Nút này sẽ ẩn nếu người dùng dùng web/đã cài) */}
+      <InstallPrompt />
+    </>
+  );
 }
