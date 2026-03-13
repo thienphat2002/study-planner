@@ -565,7 +565,7 @@ export default function Calendar() {
         className="fixed bottom-10 right-10 z-[100] flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-white rounded-full shadow-[0_8px_30px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all cursor-pointer"
       >
         <Plus className="w-5 h-5" strokeWidth={3} />
-        <span className="font-bold text-[15px]">Add New Event</span>
+        <span className="font-bold text-[15px]">Add New Class</span>
       </button>
 
       {/* --- TOAST NOTIFICATION --- */}

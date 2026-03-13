@@ -77,7 +77,7 @@ export default function Login() {
       >
         <div className="w-1/2 flex flex-col !bg-white" style={{ padding: "48px" }}>
           <div className="mb-8">
-            <h1 className="text-[24px] font-bold !text-[#2563EB]">
+            <h1 className="text-[24px] font-bold !text-primary">
               Smart Study Planner
             </h1>
           </div>
@@ -155,7 +155,7 @@ export default function Login() {
             </div>
 
             <div className="flex justify-end -mt-2">
-              <Link to="/forgotpassword" className="text-[14px] font-medium hover:underline transition-all !text-[#2563EB]">
+              <Link to="/forgotpassword" className="text-[14px] font-medium hover:underline transition-all !text-primary">
                 Forgot password?
               </Link>
             </div>
@@ -171,7 +171,7 @@ export default function Login() {
             <div className="text-center">
               <p className="text-sm !text-[#6B7280]">
                 Don't have an account?{' '}
-                <Link to="/signup" className="font-medium hover:underline transition-all !text-[#2563EB]">
+                <Link to="/signup" className="font-medium hover:underline transition-all !text-primary">
                   Sign up
                 </Link>
               </p>
