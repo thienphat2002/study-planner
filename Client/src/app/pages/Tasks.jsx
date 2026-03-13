@@ -234,7 +234,7 @@ export default function Tasks() {
                         {/* --- Ô VUÔNG CHECKBOX ĐÃ ĐƯỢC GẮN SỰ KIỆN CLICK --- */}
                         <div 
                           onClick={(e) => handleToggleStatus(task, e)}
-                          className={`w-5 h-5 border-2 rounded-[4px] flex items-center justify-center transition-colors cursor-pointer ${status === 'completed' ? 'bg-[#22C55E] border-[#22C55E]' : 'border-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]'}`}
+                          className={`w-5 h-5 border-2 rounded-[4px] flex items-center justify-center transition-colors cursor-pointer ${status === 'completed' ? 'bg-[#22C55E] border-[#22C55E]' : 'border-primary hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]'}`}
                         >
                           {status === 'completed' && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                         </div>
@@ -289,7 +289,7 @@ export default function Tasks() {
           </div>
           <div className="space-y-3">
             {taskList.map((task) => (
-              <Card key={task.id} className={`p-4 cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-transparent hover:border-[#2563EB] group relative ${status === 'completed' ? 'opacity-60' : ''}`}>
+              <Card key={task.id} className={`p-4 cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-transparent hover:border-primary group relative ${status === 'completed' ? 'opacity-60' : ''}`}>
                 
                 <button 
                   onClick={(e) => triggerDelete(task, e)}
@@ -379,7 +379,7 @@ export default function Tasks() {
         <h1 className="dark:text-white">Tasks</h1>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white rounded-[8px] hover:bg-[#1d4ed8] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
+          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-[8px] hover:bg-primary/90 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
         >
           <Plus className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
           <span className="font-semibold text-[15px] leading-none">Add Task</span>
@@ -391,24 +391,24 @@ export default function Tasks() {
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8] group-focus-within:text-[#2563EB] transition-colors" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8] group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 placeholder="Search tasks by title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-2.5 w-full bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px] text-[#111827] dark:text-white placeholder:text-[#94A3B8]"
+                className="pl-12 pr-4 py-2.5 w-full bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-primary transition-all text-[15px] text-[#111827] dark:text-white placeholder:text-[#94A3B8]"
               />
             </div>
           </div>
           <div className="relative" ref={filterRef}>
             <button 
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center px-5 py-2.5 rounded-[10px] font-semibold transition-all border cursor-pointer ${filterPriority !== 'all' ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 border-[#BFDBFE] dark:border-[#1e3a8a] text-[#2563EB] dark:text-[#60A5FA] shadow-sm' : 'bg-white dark:bg-[#1E293B] border-[#E5E7EB] dark:border-[#334155] text-[#475569] dark:text-[#CBD5E1] hover:bg-[#F8FAFC] dark:hover:bg-[#334155]'}`}
+              className={`flex items-center px-5 py-2.5 rounded-[10px] font-semibold transition-all border cursor-pointer ${filterPriority !== 'all' ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 border-[#BFDBFE] dark:border-[#1e3a8a] text-primary dark:text-[#60A5FA] shadow-sm' : 'bg-white dark:bg-[#1E293B] border-[#E5E7EB] dark:border-[#334155] text-[#475569] dark:text-[#CBD5E1] hover:bg-[#F8FAFC] dark:hover:bg-[#334155]'}`}
             >
               <Filter className="w-4 h-4 mr-2" />
               Filter 
-              {filterPriority !== 'all' && <span className="ml-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#2563EB] text-white text-[11px]">1</span>}
+              {filterPriority !== 'all' && <span className="ml-2 w-5 h-5 flex items-center justify-center rounded-full bg-primary text-white text-[11px]">1</span>}
             </button>
             {isFilterOpen && (
               <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#1E293B] rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-[#E5E7EB] dark:border-[#334155] z-20 py-2 animate-in fade-in slide-in-from-top-2 overflow-hidden">
@@ -420,13 +420,13 @@ export default function Tasks() {
                       <button
                         key={level}
                         onClick={() => { setFilterPriority(level); setIsFilterOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-[14px] flex items-center justify-between transition-colors cursor-pointer ${isSelected ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 text-[#2563EB] dark:text-[#60A5FA] font-semibold' : 'text-[#475569] dark:text-[#CBD5E1] hover:bg-[#F8FAFC] dark:hover:bg-[#334155]'}`}
+                        className={`w-full text-left px-4 py-2.5 text-[14px] flex items-center justify-between transition-colors cursor-pointer ${isSelected ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 text-primary dark:text-[#60A5FA] font-semibold' : 'text-[#475569] dark:text-[#CBD5E1] hover:bg-[#F8FAFC] dark:hover:bg-[#334155]'}`}
                       >
                         <div className="flex items-center gap-2">
                           {level !== 'all' && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: level === 'high' ? '#EF4444' : level === 'medium' ? '#F59E0B' : '#22C55E' }}></div>}
                           <span className="capitalize">{level === 'all' ? 'Show All Tasks' : level}</span>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA]" />}
+                        {isSelected && <Check className="w-4 h-4 text-primary dark:text-[#60A5FA]" />}
                       </button>
                     )
                   })}
@@ -442,7 +442,7 @@ export default function Tasks() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 text-[16px] font-medium transition-colors border-b-2 cursor-pointer ${activeTab === tab.id ? 'text-[#2563EB] dark:text-[#60A5FA] border-[#2563EB] dark:border-[#60A5FA]' : 'text-[#6B7280] dark:text-[#94A3B8] border-transparent hover:text-[#111827] dark:hover:text-white'}`}
+            className={`px-6 py-3 text-[16px] font-medium transition-colors border-b-2 cursor-pointer ${activeTab === tab.id ? 'text-primary dark:text-[#60A5FA] border-primary dark:border-[#60A5FA]' : 'text-[#6B7280] dark:text-[#94A3B8] border-transparent hover:text-[#111827] dark:hover:text-white'}`}
           >
             {tab.label}
           </button>
@@ -451,7 +451,7 @@ export default function Tasks() {
 
       {loadingData ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[#2563EB] animate-spin mb-4" />
+          <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
           <p className="text-[#6B7280] dark:text-[#94A3B8]">Loading tasks...</p>
         </div>
       ) : (
@@ -523,7 +523,7 @@ export default function Tasks() {
                   <select
                     value={newTaskSubjectId}
                     onChange={(e) => setNewTaskSubjectId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 dark:focus:ring-[#2563EB]/50 focus:border-[#2563EB] transition-colors cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 dark:focus:ring-[#2563EB]/50 focus:border-primary transition-colors cursor-pointer"
                   >
                     <option value="">-- Select Subject --</option>
                     {subjectsList.map(sub => (
@@ -532,12 +532,18 @@ export default function Tasks() {
                   </select>
                 </div>
 
-                <Input 
-                  label="Due Date" 
-                  type="datetime-local" 
-                  value={newTaskDeadline}
-                  onChange={(e) => setNewTaskDeadline(e.target.value)}
-                />
+                {/* --- Ô CHỌN NGÀY ĐÃ ĐƯỢC FIX LỖI --- */}
+                <div className="space-y-2">
+                  <label className="block text-[14px] font-medium text-[#111827] dark:text-white transition-colors">
+                    Due Date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={newTaskDeadline}
+                    onChange={(e) => setNewTaskDeadline(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 dark:focus:ring-[#2563EB]/50 focus:border-primary transition-colors cursor-pointer dark:[color-scheme:dark]"
+                  />
+                </div>
               </div>
 
               <Input 
@@ -554,7 +560,7 @@ export default function Tasks() {
                 <button 
                   onClick={handleCreateTask}
                   disabled={loadingAdd}
-                  className={`flex flex-row items-center justify-center gap-2 px-6 py-2.5 bg-[#2563EB] text-white rounded-[10px] hover:bg-[#1d4ed8] shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap ${loadingAdd ? 'opacity-50' : ''}`}
+                  className={`flex flex-row items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-[10px] hover:bg-primary/90 shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap ${loadingAdd ? 'opacity-50' : ''}`}
                 >
                   <Plus className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
                   <span className="font-semibold text-[15px] leading-none">

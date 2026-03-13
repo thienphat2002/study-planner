@@ -6,7 +6,7 @@ export default function Button({
   ...props 
 }) {
   const variants = {
-    primary: 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-[0_4px_12px_rgba(37,99,235,0.15)]',
+    primary: 'bg-primary text-white hover:bg-primary/90 shadow-[0_4px_12px_rgba(37,99,235,0.15)]',
     secondary: 'bg-[#7C3AED] text-white hover:bg-[#6d28d9] shadow-[0_4px_12px_rgba(124,58,237,0.15)]',
     success: 'bg-[#22C55E] text-white hover:bg-[#16a34a] shadow-[0_4px_12px_rgba(34,197,94,0.15)]',
     warning: 'bg-[#F59E0B] text-white hover:bg-[#d97706] shadow-[0_4px_12px_rgba(245,158,11,0.15)]',

@@ -153,7 +153,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh]">
-        <Loader2 className="w-12 h-12 text-[#2563EB] animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-[#6B7280] dark:text-[#94A3B8] font-medium">Loading your dashboard...</p>
       </div>
     );
@@ -208,7 +208,7 @@ export default function Dashboard() {
             <h2 className="text-[18px] font-bold text-[#111827] dark:text-white">Upcoming Tasks</h2>
             <button 
               onClick={() => navigate('/tasks')}
-              className="text-[14px] font-bold text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1d4ed8] dark:hover:text-[#60A5FA] flex items-center gap-1 transition-colors group cursor-pointer px-2 py-1 rounded-md hover:bg-[#EFF6FF] dark:hover:bg-[#0F172A]"
+              className="text-[14px] font-bold text-primary dark:text-[#3B82F6] hover:text-[#1d4ed8] dark:hover:text-[#60A5FA] flex items-center gap-1 transition-colors group cursor-pointer px-2 py-1 rounded-md hover:bg-[#EFF6FF] dark:hover:bg-[#0F172A]"
             >
               View All 
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -230,7 +230,7 @@ export default function Dashboard() {
                     className="flex items-start gap-4 p-4 bg-[#F8FAFC] dark:bg-[#0F172A] border border-transparent dark:border-[#334155] rounded-[8px] hover:bg-[#EFF6FF] dark:hover:bg-[#1E293B] transition-colors cursor-pointer"
                   >
                     <div className="mt-1">
-                      <div className="w-5 h-5 border-2 border-[#2563EB] rounded-[4px] hover:bg-[#2563EB] transition-colors cursor-pointer"></div>
+                      <div className="w-5 h-5 border-2 border-primary rounded-[4px] hover:bg-primary transition-colors cursor-pointer"></div>
                     </div>
                     <div className="flex-1">
                       <h4 className="text-[16px] font-medium text-[#111827] dark:text-white mb-1">{task.title}</h4>
@@ -257,7 +257,7 @@ export default function Dashboard() {
         {/* CARD BÊN PHẢI: LỊCH HỌC HÔM NAY (CHỈ HIỂN THỊ THÔNG TIN) */}
         <Card className="p-6 flex flex-col h-full">
           <h2 className="mb-6 text-[18px] font-bold text-[#111827] dark:text-white flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-[#2563EB]" />
+            <CalendarIcon className="w-5 h-5 text-primary" />
             Today's Class Schedule
           </h2>
           

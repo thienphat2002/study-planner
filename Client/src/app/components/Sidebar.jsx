@@ -37,7 +37,7 @@ export default function Sidebar() {
               to={item.path}
               className={`flex items-center gap-3 px-4 py-3 rounded-[8px] transition-all ${
                 isActive 
-                  ? 'bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.2)]' 
+                  ? 'bg-primary text-white shadow-[0_4px_12px_rgba(37,99,235,0.2)]' 
                   : 'text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#334155] hover:text-[#111827] dark:hover:text-white' 
               }`}
             >
