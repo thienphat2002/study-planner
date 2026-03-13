@@ -94,7 +94,7 @@ export default function Subjects() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white rounded-[8px] hover:bg-[#1d4ed8] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
+          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-[8px] hover:bg-[#1d4ed8] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
         >
           <Plus className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
           <span className="font-semibold text-[15px] leading-none">Add Subject</span>
@@ -104,7 +104,7 @@ export default function Subjects() {
       {/* HIỂN THỊ LOADING KHI ĐANG TẢI DỮ LIỆU */}
       {loadingData ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[#2563EB] animate-spin mb-4" />
+          <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
           <p className="text-[#6B7280] dark:text-[#94A3B8]">Loading your subjects...</p>
         </div>
       ) : (
@@ -166,12 +166,12 @@ export default function Subjects() {
 
           {/* Nút Add Card luôn nằm cuối danh sách */}
           <Card 
-            className="p-6 border-2 border-dashed border-[#E5E7EB] dark:border-[#334155] hover:border-[#2563EB] dark:hover:border-[#2563EB] bg-transparent hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]/20 transition-all cursor-pointer flex items-center justify-center min-h-[280px]"
+            className="p-6 border-2 border-dashed border-[#E5E7EB] dark:border-[#334155] hover:border-primary dark:hover:border-primary bg-transparent hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]/20 transition-all cursor-pointer flex items-center justify-center min-h-[280px]"
             onClick={() => setIsModalOpen(true)}
           >
             <div className="text-center">
               <div className="w-16 h-16 bg-[#EFF6FF] dark:bg-[#1e3a8a]/40 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-[#2563EB] dark:text-[#60A5FA]" />
+                <Plus className="w-8 h-8 text-primary dark:text-[#60A5FA]" />
               </div>
               <h3 className="text-[16px] font-medium text-[#111827] dark:text-white mb-1">Add New Subject</h3>
               <p className="text-[14px] text-[#6B7280] dark:text-[#94A3B8]">Start tracking a new subject</p>

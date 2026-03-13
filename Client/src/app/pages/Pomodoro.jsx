@@ -11,32 +11,25 @@ export default function Pomodoro() {
   const [showSettings, setShowSettings] = useState(false);
   const [tempDurations, setTempDurations] = useState(durations);
   
-  // --- 1. STATE SESSIONS ĐƯỢC NÂNG CẤP ĐỂ NHỚ DỮ LIỆU ---
   const [sessions, setSessionsCompleted] = useState(() => {
     const savedData = localStorage.getItem('dailyPomodoro');
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // Kiểm tra xem data lưu có phải của ngày hôm nay không
       if (parsed.date === new Date().toLocaleDateString()) {
-        return parsed.count; // Nếu đúng hôm nay, trả về số cũ
+        return parsed.count;
       }
     }
-    return 0; // Nếu là ngày mới hoặc chưa có data, reset về 0
+    return 0; 
   });
 
-  // Tự động lưu vào Local Storage mỗi khi sessions thay đổi
   useEffect(() => {
     localStorage.setItem('dailyPomodoro', JSON.stringify({
       count: sessions,
       date: new Date().toLocaleDateString()
     }));
   }, [sessions]);
-  // --------------------------------------------------------
 
-  // --- STATE CUSTOM NOTIFICATIONS (TOAST) ---
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
-  // --- STATE QUẢN LÝ TASK ---
   const [tasks, setTasks] = useState([]); 
   const [selectedTaskId, setSelectedTaskId] = useState(''); 
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -48,7 +41,6 @@ export default function Pomodoro() {
     longBreak: { duration: durations.longBreak * 60, label: 'Long Break', color: '#7C3AED' },
   };
 
-  // --- HELPER SHOW TOAST ---
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => {
@@ -56,7 +48,6 @@ export default function Pomodoro() {
     }, 4000); 
   };
 
-  // --- FETCH DANH SÁCH TASK KHI VÀO TRANG ---
   useEffect(() => {
     const fetchTasks = async () => {
       const token = localStorage.getItem('token');
@@ -78,7 +69,6 @@ export default function Pomodoro() {
     fetchTasks();
   }, []);
 
-  // --- HÀM GỌI API LƯU THỜI GIAN HỌC VÀO DB ---
   const saveStudySessionToDB = async (durationInMinutes) => {
     if (!selectedTaskId) {
       showToast("Please select a task to save the session.", "warning");
@@ -174,7 +164,6 @@ export default function Pomodoro() {
   return (
     <div className="space-y-6 relative">
       
-      {/* --- CUSTOM COMPONENT: TOAST NOTIFICATION --- */}
       {toast.show && (
         <div className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-5 py-4 rounded-[12px] shadow-2xl animate-in slide-in-from-right-8 fade-in duration-300 ${
           toast.type === 'error' ? 'bg-red-500 text-white' : 
@@ -217,13 +206,13 @@ export default function Pomodoro() {
           
           <div className="w-full max-w-md mb-8">
             <label className="block text-[14px] font-bold text-[#111827] dark:text-white mb-2 flex items-center justify-center gap-2">
-              <Target className="w-4 h-4 text-[#2563EB]" /> What are you working on?
+              <Target className="w-4 h-4 text-primary" /> What are you working on?
             </label>
             <select
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
               disabled={isRunning} 
-              className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#E5E7EB] dark:border-[#334155] rounded-[12px] text-[#111827] dark:text-white focus:outline-none focus:ring-0 focus:border-[#2563EB] transition-colors cursor-pointer disabled:opacity-50"
+              className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#E5E7EB] dark:border-[#334155] rounded-[12px] text-[#111827] dark:text-white focus:outline-none focus:ring-0 focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
             >
               <option value="" disabled>-- Select a task to focus on --</option>
               {loadingTasks ? (
@@ -255,7 +244,8 @@ export default function Pomodoro() {
 
           <div className="flex items-center justify-center mb-12">
             <div className="relative">
-              <svg className="w-80 h-80 transform -rotate-90">
+              {/* --- ĐÃ FIX Ở ĐÂY: Thêm viewBox để SVG tự động co giãn không bị cắt xén --- */}
+              <svg className="w-80 h-80 transform -rotate-90" viewBox="0 0 320 320">
                 <circle cx="160" cy="160" r="140" stroke="currentColor" className="text-[#F8FAFC] dark:text-[#0F172A]" strokeWidth="12" fill="none" />
                 <circle cx="160" cy="160" r="140" stroke={modes[mode].color} strokeWidth="12" fill="none" strokeDasharray={`${2 * Math.PI * 140}`} strokeDashoffset={`${2 * Math.PI * 140 * (1 - progress / 100)}`} strokeLinecap="round" className="transition-all duration-1000 ease-linear" />
               </svg>
@@ -293,12 +283,12 @@ export default function Pomodoro() {
           <Card className="p-6">
             <h3 className="text-[16px] font-semibold text-[#111827] dark:text-white mb-4">Daily Goal</h3>
             <div className="text-center py-6">
-              <div className="text-[56px] font-bold text-[#2563EB] dark:text-[#60A5FA] mb-1 leading-none">{sessions}</div>
+              <div className="text-[56px] font-bold text-primary dark:text-[#60A5FA] mb-1 leading-none">{sessions}</div>
               <p className="text-[14px] text-[#6B7280] dark:text-[#94A3B8] font-medium">Completed Sessions</p>
             </div>
             <div className="grid grid-cols-4 gap-2 mt-2">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className={`h-2.5 rounded-full transition-colors duration-500 ${i < sessions ? 'bg-[#2563EB] dark:bg-[#3B82F6] shadow-sm' : 'bg-[#E2E8F0] dark:bg-[#334155]'}`}></div>
+                <div key={i} className={`h-2.5 rounded-full transition-colors duration-500 ${i < sessions ? 'bg-primary dark:bg-[#3B82F6] shadow-sm' : 'bg-[#E2E8F0] dark:bg-[#334155]'}`}></div>
               ))}
             </div>
           </Card>
@@ -308,7 +298,7 @@ export default function Pomodoro() {
             <div className="space-y-5">
               <div className="flex gap-4 items-start">
                 <div className="w-8 h-8 bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-[14px] font-bold text-[#2563EB] dark:text-[#60A5FA]">1</span>
+                  <span className="text-[14px] font-bold text-primary dark:text-[#60A5FA]">1</span>
                 </div>
                 <div>
                   <p className="text-[14px] text-[#111827] dark:text-white font-semibold">Select a Task</p>
@@ -350,8 +340,8 @@ export default function Pomodoro() {
             </div>
             <div className="space-y-5">
               <div>
-                <label className="block text-[14px] font-medium text-[#111827] dark:text-white mb-2 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></div>Focus Time <span className="text-[#6B7280] dark:text-[#94A3B8] font-normal">(min)</span></label>
-                <input type="number" min="1" value={tempDurations.focus} onChange={(e) => setTempDurations({...tempDurations, focus: Number(e.target.value)})} className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px] font-semibold text-[#111827] dark:text-white" />
+                <label className="block text-[14px] font-medium text-[#111827] dark:text-white mb-2 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-primary"></div>Focus Time <span className="text-[#6B7280] dark:text-[#94A3B8] font-normal">(min)</span></label>
+                <input type="number" min="1" value={tempDurations.focus} onChange={(e) => setTempDurations({...tempDurations, focus: Number(e.target.value)})} className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-primary transition-all text-[15px] font-semibold text-[#111827] dark:text-white" />
               </div>
               <div>
                 <label className="block text-[14px] font-medium text-[#111827] dark:text-white mb-2 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]"></div>Short Break <span className="text-[#6B7280] dark:text-[#94A3B8] font-normal">(min)</span></label>
@@ -365,7 +355,7 @@ export default function Pomodoro() {
                 <Button variant="outline" onClick={() => setShowSettings(false)} className="cursor-pointer px-5 dark:border-[#475569] dark:text-[#CBD5E1]">
                   <span className="font-semibold">Cancel</span>
                 </Button>
-                <button onClick={handleSaveSettings} className="flex flex-row items-center justify-center gap-2 px-6 py-2.5 bg-[#2563EB] text-white rounded-[10px] hover:bg-[#1d4ed8] shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap">
+                <button onClick={handleSaveSettings} className="flex flex-row items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-[10px] hover:opacity-90 shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap">
                   <Save className="w-4 h-4 flex-shrink-0" />
                   <span className="font-semibold text-[15px] leading-none">Save Changes</span>
                 </button>

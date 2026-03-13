@@ -1,21 +1,15 @@
 import { Moon, Sun, Save, RotateCcw, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import Card from '../components/Card';
-import Button from '../components/Button';
-import Input from '../components/Input';
 import { useState, useEffect } from 'react';
 
 export default function Settings() {
-  // --- CÁC STATE QUẢN LÝ THÔNG BÁO ---
-  const [showToast, setShowToast] = useState(false); // Thông báo lưu thành công
-  const [showResetModal, setShowResetModal] = useState(false); // Modal hỏi Reset
+  const [showToast, setShowToast] = useState(false); 
+  const [showResetModal, setShowResetModal] = useState(false); 
 
+  // --- 1. ĐÃ BỎ CÁC STATE LIÊN QUAN ĐẾN EMAIL ---
   const [notifications, setNotifications] = useState({
-    email: true, push: true, taskReminders: true, studyReminders: false, weeklyReport: true,
+    push: true, taskReminders: true, studyReminders: false
   });
-
-  const toggleNotification = (key) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
-  };
 
   const [appearance, setAppearance] = useState('light');
   const [primaryColor, setPrimaryColor] = useState('#2563EB');
@@ -24,6 +18,13 @@ export default function Settings() {
   const [preferences, setPreferences] = useState({
     pomodoro: 25, shortBreak: 5, longBreak: 15, taskPriority: 'Medium', weekStart: 'Monday'
   });
+
+  const applyFontSize = (size) => {
+    const htmlRoot = document.documentElement;
+    if (size === 'Small') htmlRoot.style.fontSize = '14px';
+    else if (size === 'Large') htmlRoot.style.fontSize = '18px';
+    else htmlRoot.style.fontSize = '16px'; 
+  };
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('userSettings');
@@ -37,43 +38,95 @@ export default function Settings() {
 
       if (parsed.appearance === 'dark') {
         document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
       }
+
+      applyFontSize(parsed.fontSize || 'Medium (Default)');
     }
   }, []);
+
+  const handleFontSizeChange = (e) => {
+    const newSize = e.target.value;
+    setFontSize(newSize);
+    applyFontSize(newSize); 
+  };
+
+  const handleToggleNotification = async (key, label) => {
+    const isTurningOn = !notifications[key];
+    setNotifications(prev => ({ ...prev, [key]: isTurningOn }));
+
+    if (isTurningOn) {
+      if (!("Notification" in window)) {
+        alert("Trình duyệt của bạn không hỗ trợ thông báo Desktop!");
+      } else if (Notification.permission === "granted") {
+        new Notification("Smart Study Planner", {
+          body: `Đã bật tính năng: ${label}`,
+          icon: "https://cdn-icons-png.flaticon.com/512/3239/3239952.png" 
+        });
+      } else if (Notification.permission !== "denied") {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          new Notification("Smart Study Planner", {
+            body: `Thông báo đã được cấp quyền cho: ${label}`,
+          });
+        } else {
+          setNotifications(prev => ({ ...prev, [key]: false }));
+          alert("Bạn đã chặn thông báo. Vui lòng cấp quyền trong cài đặt trình duyệt.");
+        }
+      }
+    }
+  };
+
+  const handleThemeChange = (newTheme) => {
+    setAppearance(newTheme); 
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+    
+    const savedSettings = localStorage.getItem('userSettings');
+    let currentSettings = savedSettings ? JSON.parse(savedSettings) : {};
+    currentSettings.appearance = newTheme;
+    localStorage.setItem('userSettings', JSON.stringify(currentSettings));
+  };
 
   const handleSave = () => {
     const allSettings = { notifications, appearance, primaryColor, fontSize, preferences };
     localStorage.setItem('userSettings', JSON.stringify(allSettings));
     
-    if (appearance === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    // Hiện Toast thông báo lưu thành công
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  // Hàm xử lý Reset thực sự khi bấm confirm trên Modal
   const confirmReset = () => {
-    setNotifications({ email: true, push: true, taskReminders: true, studyReminders: false, weeklyReport: true });
+    setNotifications({ push: true, taskReminders: true, studyReminders: false });
     setAppearance('light');
     setPrimaryColor('#2563EB');
-    setFontSize('Medium (Default)');
+    document.documentElement.style.setProperty('--color-primary', '#2563EB');
+    
+    const defaultFontSize = 'Medium (Default)';
+    setFontSize(defaultFontSize);
+    applyFontSize(defaultFontSize); 
+    
     setPreferences({ pomodoro: 25, shortBreak: 5, longBreak: 15, taskPriority: 'Medium', weekStart: 'Monday' });
+    
     localStorage.removeItem('userSettings');
+    
     document.documentElement.classList.remove('dark');
-    setShowResetModal(false); // Đóng modal
+    document.body.classList.remove('dark');
+    
+    setShowResetModal(false); 
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto relative"> 
       
-      {/* 1. TOAST THÔNG BÁO LƯU THÀNH CÔNG (HIỆN Ở GÓC) */}
       {showToast && (
         <div className="fixed top-24 right-8 z-[100] animate-in slide-in-from-right duration-300">
           <div className="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-2xl p-4 flex items-center gap-3 min-w-[320px]">
@@ -91,7 +144,6 @@ export default function Settings() {
         </div>
       )}
 
-      {/* 2. MODAL XÁC NHẬN RESET (HIỆN Ở GIỮA MÀN HÌNH) */}
       {showResetModal && (
         <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] border dark:border-[#334155] rounded-3xl p-8 w-full max-w-[440px] shadow-2xl relative animate-in fade-in zoom-in duration-200">
@@ -137,26 +189,24 @@ export default function Settings() {
               <label className="block text-[14px] font-medium text-[#111827] dark:text-gray-200 mb-3">Theme</label>
               <div className="grid grid-cols-2 gap-4">
                 <button
-                  onClick={() => setAppearance('light')}
-                  className={`p-4 border-2 rounded-[12px] transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-                    appearance === 'light'
-                      ? 'border-[#2563EB] bg-[#EFF6FF] dark:bg-[#1e3a8a]/20 shadow-sm'
-                      : 'border-[#E5E7EB] dark:border-[#475569] hover:border-[#2563EB] bg-white dark:bg-[#0F172A]'
+                  onClick={() => handleThemeChange('light')}
+                  className={`p-4 border-2 rounded-[12px] transition-all cursor-pointer flex flex-col items-center justify-center gap-2 bg-white dark:bg-[#0F172A] ${
+                    appearance === 'light' ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/20 shadow-sm' : 'border-[#E5E7EB] dark:border-[#475569]'
                   }`}
+                  style={appearance === 'light' ? { borderColor: primaryColor } : {}}
                 >
-                  <Sun className={`w-8 h-8 ${appearance === 'light' ? 'text-[#F59E0B]' : 'text-[#94A3B8] dark:text-[#64748B]'}`} />
-                  <p className={`text-[14px] font-semibold ${appearance === 'light' ? 'text-[#2563EB]' : 'text-[#475569] dark:text-[#94A3B8]'}`}>Light Mode</p>
+                  <Sun className={`w-8 h-8 ${appearance === 'light' ? '' : 'text-[#94A3B8] dark:text-[#64748B]'}`} style={appearance === 'light' ? { color: primaryColor } : {}} />
+                  <p className={`text-[14px] font-semibold ${appearance === 'light' ? '' : 'text-[#475569] dark:text-[#94A3B8]'}`} style={appearance === 'light' ? { color: primaryColor } : {}}>Light Mode</p>
                 </button>
                 <button
-                  onClick={() => setAppearance('dark')}
-                  className={`p-4 border-2 rounded-[12px] transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-                    appearance === 'dark'
-                      ? 'border-[#7C3AED] bg-[#F5F3FF] dark:bg-[#5b21b6]/30 shadow-sm'
-                      : 'border-[#E5E7EB] dark:border-[#475569] hover:border-[#7C3AED] bg-white dark:bg-[#0F172A]'
+                  onClick={() => handleThemeChange('dark')}
+                  className={`p-4 border-2 rounded-[12px] transition-all cursor-pointer flex flex-col items-center justify-center gap-2 bg-white dark:bg-[#0F172A] ${
+                    appearance === 'dark' ? 'bg-[#F5F3FF] dark:bg-[#5b21b6]/30 shadow-sm' : 'border-[#E5E7EB] dark:border-[#475569]'
                   }`}
+                  style={appearance === 'dark' ? { borderColor: primaryColor } : {}}
                 >
-                  <Moon className={`w-8 h-8 ${appearance === 'dark' ? 'text-[#7C3AED]' : 'text-[#94A3B8] dark:text-[#64748B]'}`} />
-                  <p className={`text-[14px] font-semibold ${appearance === 'dark' ? 'text-[#7C3AED]' : 'text-[#475569] dark:text-[#94A3B8]'}`}>Dark Mode</p>
+                  <Moon className={`w-8 h-8 ${appearance === 'dark' ? '' : 'text-[#94A3B8] dark:text-[#64748B]'}`} style={appearance === 'dark' ? { color: primaryColor } : {}} />
+                  <p className={`text-[14px] font-semibold ${appearance === 'dark' ? '' : 'text-[#475569] dark:text-[#94A3B8]'}`} style={appearance === 'dark' ? { color: primaryColor } : {}}>Dark Mode</p>
                 </button>
               </div>
             </div>
@@ -165,8 +215,9 @@ export default function Settings() {
               <label className="block text-[14px] font-medium text-[#111827] dark:text-gray-200 mb-3">Font Size</label>
               <select 
                 value={fontSize}
-                onChange={(e) => setFontSize(e.target.value)}
-                className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px] text-[#111827] dark:text-white cursor-pointer"
+                onChange={handleFontSizeChange} 
+                className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] focus:outline-none focus:ring-2 transition-all text-[15px] text-[#111827] dark:text-white cursor-pointer"
+                style={{ focusRingColor: primaryColor }} 
               >
                 <option value="Small">Small</option>
                 <option value="Medium (Default)">Medium (Default)</option>
@@ -180,7 +231,10 @@ export default function Settings() {
                 {['#2563EB', '#7C3AED', '#22C55E', '#F59E0B', '#EF4444', '#06B6D4'].map(color => (
                   <button
                     key={color}
-                    onClick={() => setPrimaryColor(color)}
+                    onClick={() => {
+                      setPrimaryColor(color);
+                      document.documentElement.style.setProperty('--color-primary', color);
+                    }}
                     className={`w-12 h-12 rounded-full hover:scale-110 transition-all cursor-pointer shadow-sm ${
                       primaryColor === color ? 'ring-4 ring-offset-2 dark:ring-offset-[#1E293B]' : ''
                     }`}
@@ -197,12 +251,11 @@ export default function Settings() {
           <h2 className="mb-6 dark:text-white">Notifications</h2>
           
           <div className="space-y-3">
+            {/* 2. ĐÃ XÓA MỤC EMAIL VÀ WEEKLY REPORT */}
             {[
-              { key: 'email', label: 'Email Notifications', description: 'Receive updates via email' },
               { key: 'push', label: 'Push Notifications', description: 'Get notifications on your device' },
               { key: 'taskReminders', label: 'Task Reminders', description: 'Reminders for upcoming tasks' },
               { key: 'studyReminders', label: 'Study Session Reminders', description: 'Reminders to start study sessions' },
-              { key: 'weeklyReport', label: 'Weekly Progress Report', description: 'Receive weekly summary emails' },
             ].map((item) => (
               <div key={item.key} className="flex items-center justify-between p-4 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-[10px] border border-transparent dark:border-[#1E293B] hover:border-[#E5E7EB] dark:hover:border-[#334155] transition-colors">
                 <div className="flex-1">
@@ -210,10 +263,11 @@ export default function Settings() {
                   <p className="text-[13px] text-[#6B7280] dark:text-[#94A3B8] mt-0.5">{item.description}</p>
                 </div>
                 <button
-                  onClick={() => toggleNotification(item.key)}
+                  onClick={() => handleToggleNotification(item.key, item.label)}
                   className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${
-                    notifications[item.key] ? 'bg-[#2563EB]' : 'bg-[#CBD5E1] dark:bg-[#475569]'
+                    !notifications[item.key] && 'bg-[#CBD5E1] dark:bg-[#475569]'
                   }`}
+                  style={notifications[item.key] ? { backgroundColor: primaryColor } : {}}
                 >
                   <div
                     className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
@@ -239,7 +293,7 @@ export default function Settings() {
                     type="number" 
                     value={preferences.pomodoro}
                     onChange={(e) => setPreferences({...preferences, pomodoro: Number(e.target.value)})}
-                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px]"
+                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none transition-all text-[15px]"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] text-[13px]">min</span>
                 </div>
@@ -252,7 +306,7 @@ export default function Settings() {
                     type="number" 
                     value={preferences.shortBreak}
                     onChange={(e) => setPreferences({...preferences, shortBreak: Number(e.target.value)})}
-                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px]"
+                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none transition-all text-[15px]"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] text-[13px]">min</span>
                 </div>
@@ -265,7 +319,7 @@ export default function Settings() {
                     type="number" 
                     value={preferences.longBreak}
                     onChange={(e) => setPreferences({...preferences, longBreak: Number(e.target.value)})}
-                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px]"
+                    className="w-full pl-4 pr-12 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none transition-all text-[15px]"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] text-[13px]">min</span>
                 </div>
@@ -278,7 +332,7 @@ export default function Settings() {
                 <select 
                   value={preferences.taskPriority}
                   onChange={(e) => setPreferences({...preferences, taskPriority: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px] cursor-pointer"
+                  className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none transition-all text-[15px] cursor-pointer"
                 >
                   <option value="Low">Low Priority</option>
                   <option value="Medium">Medium Priority</option>
@@ -290,7 +344,7 @@ export default function Settings() {
                 <select 
                   value={preferences.weekStart}
                   onChange={(e) => setPreferences({...preferences, weekStart: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all text-[15px] cursor-pointer"
+                  className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] text-[#111827] dark:text-white rounded-[10px] focus:outline-none transition-all text-[15px] cursor-pointer"
                 >
                   <option value="Sunday">Sunday</option>
                   <option value="Monday">Monday</option>
@@ -310,7 +364,8 @@ export default function Settings() {
 
             <button 
               onClick={handleSave}
-              className="flex flex-row items-center justify-center gap-2 px-6 py-2.5 bg-[#2563EB] text-white rounded-[10px] hover:bg-[#1d4ed8] shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap font-semibold"
+              className="flex flex-row items-center justify-center gap-2 px-6 py-2.5 text-white rounded-[10px] shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap font-semibold"
+              style={{ backgroundColor: primaryColor }}
             >
               <Save className="w-4 h-4" />
               Save Changes

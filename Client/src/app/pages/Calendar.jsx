@@ -387,7 +387,7 @@ export default function Calendar() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh]">
-        <Loader2 className="w-12 h-12 text-[#2563EB] animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-[#6B7280]">Loading your schedule...</p>
       </div>
     );
@@ -419,7 +419,7 @@ export default function Calendar() {
                 onClick={() => setView(v.toLowerCase())}
                 className={`px-5 py-2 text-[14px] font-bold rounded-[8px] transition-all cursor-pointer ${
                   view === v.toLowerCase() 
-                  ? 'bg-[#2563EB] text-white shadow-md' 
+                  ? 'bg-primary text-white shadow-md' 
                   : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#111827] dark:hover:text-white hover:bg-[#F8FAFC] dark:hover:bg-[#0F172A]'
                 }`}
               >
@@ -429,7 +429,7 @@ export default function Calendar() {
           </div>
           <button 
             onClick={goToToday}
-            className="px-6 py-2.5 bg-white dark:bg-[#1E293B] border-2 border-[#E5E7EB] dark:border-[#334155] hover:border-[#2563EB] dark:hover:border-[#2563EB] text-[#475569] dark:text-[#CBD5E1] font-bold text-[14px] rounded-[10px] hover:text-[#2563EB] transition-colors shadow-sm cursor-pointer"
+            className="px-6 py-2.5 bg-white dark:bg-[#1E293B] border-2 border-[#E5E7EB] dark:border-[#334155] hover:border-primary dark:hover:border-primary text-[#475569] dark:text-[#CBD5E1] font-bold text-[14px] rounded-[10px] hover:text-primary transition-colors shadow-sm cursor-pointer"
           >
             Today
           </button>
@@ -446,11 +446,11 @@ export default function Calendar() {
               <div className={`flex-1 grid ${view === 'week' ? 'grid-cols-7' : 'grid-cols-1'}`}>
                 {(view === 'week' ? getDaysInWeek() : [currentDate]).map((date, i) => (
                   <div key={i} className="flex flex-col items-center justify-center py-3 border-r last:border-r-0 border-[#E5E7EB] dark:border-[#334155]">
-                    <span className={`text-[12px] font-bold mb-1.5 uppercase ${isSameDay(date, new Date()) ? 'text-[#2563EB]' : 'text-[#64748B] dark:text-[#94A3B8]'}`}>
+                    <span className={`text-[12px] font-bold mb-1.5 uppercase ${isSameDay(date, new Date()) ? 'text-primary' : 'text-[#64748B] dark:text-[#94A3B8]'}`}>
                       {view === 'week' ? dayNamesShort[i] : dayNamesFull[date.getDay() === 0 ? 6 : date.getDay() - 1]}
                     </span>
                     <div className={`w-8 h-8 flex items-center justify-center rounded-full text-[15px] font-bold ${
-                      isSameDay(date, new Date()) ? 'bg-[#2563EB] text-white shadow-sm' : 'text-[#111827] dark:text-white'
+                      isSameDay(date, new Date()) ? 'bg-primary text-white shadow-sm' : 'text-[#111827] dark:text-white'
                     }`}>
                       {date.getDate()}
                     </div>
@@ -530,7 +530,7 @@ export default function Calendar() {
                       <div className="flex flex-col h-full">
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold mb-2 ${
                           isSameDay(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), new Date()) 
-                          ? 'bg-[#2563EB] text-white shadow-sm' 
+                          ? 'bg-primary text-white shadow-sm' 
                           : 'text-[#475569] dark:text-[#CBD5E1]'
                         }`}>
                           {day}
@@ -562,7 +562,7 @@ export default function Calendar() {
       {/* FLOAT BUTTON */}
       <button 
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-10 right-10 z-[100] flex items-center justify-center gap-2 px-6 py-3.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-full shadow-[0_8px_30px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all cursor-pointer"
+        className="fixed bottom-10 right-10 z-[100] flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-white rounded-full shadow-[0_8px_30px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all cursor-pointer"
       >
         <Plus className="w-5 h-5" strokeWidth={3} />
         <span className="font-bold text-[15px]">Add New Event</span>
@@ -635,7 +635,7 @@ export default function Calendar() {
                 <select
                   value={selectedSubject}
                   onChange={handleSubjectChange} // Dùng hàm mới để tự động lấy màu
-                  className="w-full px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] cursor-pointer"
+                  className="w-full px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-primary cursor-pointer"
                 >
                   <option value="">-- Select Subject --</option>
                   {subjects.map(sub => (
@@ -684,7 +684,7 @@ export default function Calendar() {
                         className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors cursor-pointer border ${
                           isSelected 
                           ? 'text-white shadow-sm' 
-                          : 'bg-white dark:bg-[#0F172A] text-[#6B7280] dark:text-[#CBD5E1] border-[#E5E7EB] dark:border-[#334155] hover:border-[#2563EB] dark:hover:border-[#2563EB]'
+                          : 'bg-white dark:bg-[#0F172A] text-[#6B7280] dark:text-[#CBD5E1] border-[#E5E7EB] dark:border-[#334155] hover:border-primary dark:hover:border-primary'
                         }`}
                         // Hiển thị màu được chọn trên các nút "Thứ" đang active cho đẹp
                         style={isSelected ? { backgroundColor: selectedColor, borderColor: selectedColor } : {}}
@@ -709,7 +709,7 @@ export default function Calendar() {
                   <select
                     value={recurrence}
                     onChange={(e) => setRecurrence(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-primary cursor-pointer"
                   >
                     <option value="EVERY_WEEK">Every Week (Fixed)</option>
                     <option value="EVEN_WEEKS">Even Weeks Only</option>

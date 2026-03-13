@@ -9,6 +9,14 @@ export default function ForgotPassword() {
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     document.body.classList.remove('dark');
+
+    // Chống lỗi chớp đen khi F5
+    const timer = setTimeout(() => {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const [email, setEmail] = useState('');
@@ -62,15 +70,25 @@ export default function ForgotPassword() {
   if (success) {
     return (
       <AuthLayout>
-        <div className="flex flex-col gap-5 !bg-white">
-          <h1 className="text-[32px] font-bold !text-[#111827]">Success!</h1>
-          <p className="text-base !text-[#6B7280]">
-            Your password has been reset successfully.
-          </p>
+        <div className="flex flex-col gap-6 !bg-white">
+          {/* TIÊU ĐỀ SMART STUDY PLANNER TRONG TRẠNG THÁI SUCCESS */}
+          <div>
+            <h1 className="text-2xl font-bold !text-primary">
+              Smart Study Planner
+            </h1>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[32px] font-bold !text-[#111827]">Success!</h2>
+            <p className="text-base !text-[#6B7280]">
+              Your password has been reset successfully.
+            </p>
+          </div>
+
           <Button 
             onClick={handleSignInClick}
             tabIndex={-1}
-            className="w-full h-[48px] rounded-[12px] font-medium cursor-pointer hover:opacity-90 transition-opacity"
+            className="w-full h-[48px] rounded-[12px] font-medium cursor-pointer hover:opacity-90 transition-opacity mt-4"
             style={{ backgroundColor: "#2563EB", color: "#FFFFFF" }}
           >
             Go to Sign In
@@ -82,12 +100,21 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-5 !bg-white">
-        <h1 className="text-[32px] font-bold !text-[#111827]">Forgot password</h1>
+      <div className="flex flex-col gap-6 !bg-white">
+        
+        {/* TIÊU ĐỀ SMART STUDY PLANNER */}
+        <div>
+          <h1 className="text-2xl font-bold !text-primary">
+            Smart Study Planner
+          </h1>
+        </div>
 
-        <p className="text-base !text-[#6B7280]">
-          Enter your registered email and set your new password.
-        </p>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-[32px] font-bold !text-[#111827]">Forgot password</h2>
+          <p className="text-base !text-[#6B7280]">
+            Enter your registered email and set your new password.
+          </p>
+        </div>
 
         <div className="flex flex-col gap-5 mt-2">
           <div className="flex flex-col gap-1">
@@ -96,8 +123,8 @@ export default function ForgotPassword() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              label="" /* Thêm prop này để fix lỗi TypeScript */
-              error={emailError} /* Thêm prop này để fix lỗi TypeScript */
+              label=""
+              error={emailError}
               onChange={(e: any) => {
                 setEmail(e.target.value);
                 if (e.target.value) setEmailError('');
@@ -113,8 +140,8 @@ export default function ForgotPassword() {
               type="password"
               placeholder="Enter new password"
               value={password}
-              label="" /* Thêm prop này để fix lỗi TypeScript */
-              error={passwordError} /* Thêm prop này để fix lỗi TypeScript */
+              label=""
+              error={passwordError}
               onChange={(e: any) => {
                 setPassword(e.target.value);
                 if (e.target.value) setPasswordError('');
@@ -131,8 +158,8 @@ export default function ForgotPassword() {
               type="password"
               placeholder="Re-enter new password"
               value={confirmPassword}
-              label="" /* Thêm prop này để fix lỗi TypeScript */
-              error={confirmPasswordError} /* Thêm prop này để fix lỗi TypeScript */
+              label=""
+              error={confirmPasswordError}
               onChange={(e: any) => {
                 setConfirmPassword(e.target.value);
                 if (e.target.value) setConfirmPasswordError('');
@@ -158,7 +185,7 @@ export default function ForgotPassword() {
           Already have an account?{' '}
           <button
             onClick={handleSignInClick}
-            className="!text-[#2563EB] font-medium hover:underline cursor-pointer"
+            className="!text-primary font-medium hover:underline cursor-pointer"
           >
             Sign In
           </button>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'; // <-- QUAN TRỌNG: Thêm import useEffect
+import { useEffect } from 'react';
 import { Outlet } from 'react-router';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';

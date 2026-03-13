@@ -91,8 +91,8 @@ export default function Signup() {
         <div className="w-1/2 overflow-y-auto flex flex-col !bg-white" style={{ padding: '48px' }}>
           <div className="flex flex-col gap-6">
             <div>
-              <h1 className="text-2xl font-bold !text-[#2563EB]">
-                SmartStudy
+              <h1 className="text-2xl font-bold !text-primary">
+                Smart Study Planner
               </h1>
             </div>
 
@@ -227,7 +227,7 @@ export default function Signup() {
             <div className="text-center pb-6">
               <p className="text-sm !text-[#6B7280]">
                 Already have an account?{' '}
-                <Link to="/login" className="font-medium hover:underline transition-all !text-[#2563EB]">
+                <Link to="/login" className="font-medium hover:underline transition-all !text-primary">
                   Sign in
                 </Link>
               </p>
