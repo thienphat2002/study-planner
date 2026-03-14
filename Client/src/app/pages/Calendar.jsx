@@ -27,7 +27,7 @@ export default function Calendar() {
   const [endTime, setEndTime] = useState('');
   const [room, setRoom] = useState('');
   const [recurrence, setRecurrence] = useState('EVERY_WEEK');
-  const [selectedColor, setSelectedColor] = useState('#2563EB'); // Default color
+  const [selectedColor, setSelectedColor] = useState('#2563EB'); 
 
   const PRESET_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
 
@@ -46,15 +46,24 @@ export default function Calendar() {
   const TOP_OFFSET = 30;  
   
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNamesShort = ['Mon', 'Tue', 'Wed', 'Tue', 'Fri', 'Sat', 'Sun']; 
+  const dayNamesShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; // Đã sửa lỗi chính tả ở mảng này
   const dayNamesFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  // ==========================================
+  // HÀM TÍNH SỐ TUẦN TRONG NĂM (ĐỂ XỬ LÝ TUẦN CHẴN/LẺ)
+  // ==========================================
+  const getWeekNumber = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+  };
 
   // --- HELPER SHOW TOAST ---
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast({ show: false, message: '', type: 'success' });
-    }, 4000); 
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000); 
   };
 
   // --- FETCH API ---
@@ -85,17 +94,12 @@ export default function Calendar() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const toggleDay = (dayId) => {
-    setSelectedDays(prev => 
-      prev.includes(dayId) ? prev.filter(d => d !== dayId) : [...prev, dayId]
-    );
+    setSelectedDays(prev => prev.includes(dayId) ? prev.filter(d => d !== dayId) : [...prev, dayId]);
   };
 
-  // --- HÀM XỬ LÝ XÓA LỊCH HỌC ---
   const handleDeleteClick = (id, e) => {
     e.stopPropagation(); 
     setConfirmDialog({ show: true, scheduleId: id });
@@ -121,24 +125,17 @@ export default function Calendar() {
         showToast(err.message || "Không thể xóa lịch học!", "error");
       }
     } catch (error) {
-      console.error("Lỗi xóa lịch:", error);
       showToast("Đã xảy ra lỗi khi xóa!", "error");
     }
   };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (confirmDialog.show && event.key === 'Enter') {
-        executeDelete();
-      }
-      if (confirmDialog.show && event.key === 'Escape') {
-        setConfirmDialog({ show: false, scheduleId: null });
-      }
+      if (confirmDialog.show && event.key === 'Enter') executeDelete();
+      if (confirmDialog.show && event.key === 'Escape') setConfirmDialog({ show: false, scheduleId: null });
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [confirmDialog]); 
 
   const timeToMinutesFrom1AM = (timeString) => {
@@ -154,7 +151,6 @@ export default function Calendar() {
 
     for (const day of selectedDays) {
       const classesOnDay = schedules.filter(sch => sch.dayOfWeek === day);
-      
       for (const cls of classesOnDay) {
         const existStartMins = timeToMinutesFrom1AM(cls.startTime);
         let existEndMins = timeToMinutesFrom1AM(cls.endTime);
@@ -188,30 +184,17 @@ export default function Calendar() {
     try {
       const response = await fetch('http://localhost:5000/api/v1/schedule/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
-          subjectId: selectedSubject,
-          daysOfWeek: selectedDays,
-          startTime: startTime,
-          endTime: endTime,
-          room: room,
-          recurrence: recurrence,
-          color: selectedColor 
+          subjectId: selectedSubject, daysOfWeek: selectedDays, startTime: startTime,
+          endTime: endTime, room: room, recurrence: recurrence, color: selectedColor 
         })
       });
 
       if (response.ok) {
-        setIsModalOpen(false);
-        setSelectedSubject('');
-        setSelectedDays([]);
-        setStartTime('');
-        setEndTime('');
-        setRoom('');
-        setRecurrence('EVERY_WEEK');
-        setSelectedColor('#2563EB'); 
+        setIsModalOpen(false); setSelectedSubject(''); setSelectedDays([]);
+        setStartTime(''); setEndTime(''); setRoom('');
+        setRecurrence('EVERY_WEEK'); setSelectedColor('#2563EB'); 
         fetchData(); 
         showToast("Tạo lịch học mới thành công!", "success");
       } else {
@@ -219,7 +202,6 @@ export default function Calendar() {
         showToast(err.message || "Tạo lịch học thất bại!", "error");
       }
     } catch (error) {
-      console.error("Lỗi tạo lịch:", error);
       showToast("Lỗi máy chủ khi tạo lịch!", "error");
     } finally {
       setSaving(false);
@@ -230,12 +212,9 @@ export default function Calendar() {
     const subId = e.target.value;
     setSelectedSubject(subId);
     const foundSub = subjects.find(s => s.id === subId);
-    if (foundSub && foundSub.colorCode) {
-      setSelectedColor(foundSub.colorCode);
-    }
+    if (foundSub && foundSub.colorCode) setSelectedColor(foundSub.colorCode);
   };
 
-  // --- LOGIC NGÀY THÁNG ---
   const changeDate = (amount) => {
     const newDate = new Date(currentDate);
     if (view === 'day') newDate.setDate(newDate.getDate() + amount);
@@ -269,8 +248,7 @@ export default function Calendar() {
     }
     if (view === 'week') {
       const weekDays = getDaysInWeek();
-      const firstDay = weekDays[0];
-      const lastDay = weekDays[6];
+      const firstDay = weekDays[0]; const lastDay = weekDays[6];
       const startMonth = monthNames[firstDay.getMonth()].substring(0, 3);
       const endMonth = monthNames[lastDay.getMonth()].substring(0, 3);
       
@@ -280,9 +258,7 @@ export default function Calendar() {
         return `${firstDay.getDate().toString().padStart(2, '0')} ${startMonth} - ${lastDay.getDate().toString().padStart(2, '0')} ${endMonth}, ${currentDate.getFullYear()}`;
       }
     }
-    if (view === 'month') {
-      return `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-    }
+    if (view === 'month') return `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   };
 
   const formatHour = (hour) => {
@@ -291,9 +267,7 @@ export default function Calendar() {
     return `${h} ${ampm}`;
   };
 
-  const isSameDay = (d1, d2) => {
-    return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
-  };
+  const isSameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
 
   const getMonthGrid = () => {
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
@@ -304,17 +278,13 @@ export default function Calendar() {
     for (let i = 0; i < startOffset; i++) grid.push(null);
     for (let i = 1; i <= daysInMonth; i++) grid.push(i);
     while (grid.length % 7 !== 0) grid.push(null);
-    
     return grid;
   };
 
   const renderScheduleBlock = (schedule) => {
     const startMins = timeToMinutesFrom1AM(schedule.startTime);
     let endMins = timeToMinutesFrom1AM(schedule.endTime);
-    
-    if (!schedule.endTime || endMins <= startMins) {
-      endMins = startMins + 60; 
-    }
+    if (!schedule.endTime || endMins <= startMins) endMins = startMins + 60; 
 
     const topPosition = startMins + TOP_OFFSET; 
     let blockHeight = endMins - startMins;
@@ -329,43 +299,33 @@ export default function Calendar() {
         key={schedule.id}
         className="absolute left-1 right-1 rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] flex flex-col p-1.5 transition-all hover:shadow-md cursor-pointer group z-40 overflow-hidden"
         style={{
-          top: `${topPosition}px`,
-          height: `${blockHeight}px`,
-          backgroundColor: `${color}1A`, 
-          borderLeft: `4px solid ${color}`,
-          borderTop: `1px solid ${color}30`,
-          borderRight: `1px solid ${color}30`,
-          borderBottom: `1px solid ${color}30`,
+          top: `${topPosition}px`, height: `${blockHeight}px`,
+          backgroundColor: `${color}1A`, borderLeft: `4px solid ${color}`,
+          borderTop: `1px solid ${color}30`, borderRight: `1px solid ${color}30`, borderBottom: `1px solid ${color}30`,
         }}
       >
         <div className="flex justify-between items-start w-full">
           <div className="text-[11px] font-bold text-[#111827] dark:text-white truncate pr-2">
             {schedule.subject?.name || 'Class'}
           </div>
-          
           <button 
             onClick={(e) => handleDeleteClick(schedule.id, e)}
             className="hidden group-hover:flex items-center justify-center w-5 h-5 bg-white dark:bg-[#1E293B] rounded-[4px] hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 transition-colors z-50"
-            style={{ border: `1px solid ${color}40` }}
-            title="Xóa môn học này"
+            style={{ border: `1px solid ${color}40` }} title="Xóa môn học này"
           >
             <Trash2 size={12} strokeWidth={2.5} />
           </button>
-
           <div className="text-[8px] font-bold px-1 py-0.5 rounded-[4px] bg-white dark:bg-[#1E293B] text-gray-500 uppercase tracking-wider block group-hover:hidden" style={{ border: `1px solid ${color}40` }}>
             Class
           </div>
         </div>
-        
         {blockHeight > 45 && (
           <>
             <div className="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-medium truncate mt-0.5">
               {schedule.startTime} {schedule.endTime ? `- ${schedule.endTime}` : ''}
             </div>
             {schedule.room && (
-              <div className="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate mt-auto">
-                {schedule.room}
-              </div>
+              <div className="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate mt-auto">{schedule.room}</div>
             )}
           </>
         )}
@@ -481,11 +441,20 @@ export default function Calendar() {
                   </div>
 
                   {Array.from({ length: view === 'week' ? 7 : 1 }).map((_, colIndex) => {
-                    const currentColumnDayId = view === 'week' 
-                        ? getDaysInWeek()[colIndex].getDay() 
-                        : currentDate.getDay();
+                    // LẤY NGÀY CỤ THỂ CỦA CỘT HIỆN TẠI
+                    const targetDate = view === 'week' ? getDaysInWeek()[colIndex] : currentDate;
+                    const currentColumnDayId = targetDate.getDay();
                     
-                    const colSchedules = schedules.filter(sch => sch.dayOfWeek === currentColumnDayId);
+                    // LỌC CHUẨN TỪNG LỊCH HỌC DỰA TRÊN NGÀY VÀ TUẦN CHẴN LẺ
+                    const colSchedules = schedules.filter(sch => {
+                      if (sch.dayOfWeek !== currentColumnDayId) return false;
+                      
+                      const weekNum = getWeekNumber(targetDate);
+                      if (sch.recurrence === 'EVEN_WEEKS' && weekNum % 2 !== 0) return false;
+                      if (sch.recurrence === 'ODD_WEEKS' && weekNum % 2 === 0) return false;
+                      
+                      return true; // Nếu là EVERY_WEEK hoặc khớp đúng chẵn/lẻ thì trả ra
+                    });
 
                     return (
                       <div 
@@ -515,16 +484,26 @@ export default function Calendar() {
             
             <div className="flex-1 grid grid-cols-7 grid-rows-5 auto-rows-fr">
               {getMonthGrid().map((day, i) => {
-                const currentDayIndex = (i % 7) + 1; 
-                const actualDayId = currentDayIndex === 7 ? 0 : currentDayIndex; 
-                const daySchedules = schedules.filter(sch => sch.dayOfWeek === actualDayId);
+                const targetDate = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
+                const actualDayId = targetDate ? targetDate.getDay() : null;
+
+                // LỌC LỊCH CHO TỪNG Ô NGÀY TRONG THÁNG
+                const daySchedules = !targetDate ? [] : schedules.filter(sch => {
+                  if (sch.dayOfWeek !== actualDayId) return false;
+                  
+                  const weekNum = getWeekNumber(targetDate);
+                  if (sch.recurrence === 'EVEN_WEEKS' && weekNum % 2 !== 0) return false;
+                  if (sch.recurrence === 'ODD_WEEKS' && weekNum % 2 === 0) return false;
+                  
+                  return true;
+                });
 
                 return (
                   <div key={i} className={`border-b border-r border-[#E5E7EB] dark:border-[#334155] p-2 hover:bg-[#F8FAFC] dark:hover:bg-[#1E293B]/50 transition-colors cursor-pointer min-h-[120px] ${!day ? 'bg-[#F1F5F9] dark:bg-[#0F172A]/80' : 'bg-white dark:bg-[#1E293B]'}`}>
                     {day && (
                       <div className="flex flex-col h-full">
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold mb-2 ${
-                          isSameDay(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), new Date()) 
+                          isSameDay(targetDate, new Date()) 
                           ? 'bg-primary text-white shadow-sm' 
                           : 'text-[#475569] dark:text-[#CBD5E1]'
                         }`}>
@@ -629,7 +608,7 @@ export default function Calendar() {
                 <label className="block text-[14px] font-medium text-[#111827] dark:text-white">Subject *</label>
                 <select
                   value={selectedSubject}
-                  onChange={handleSubjectChange} // Dùng hàm mới để tự động lấy màu
+                  onChange={handleSubjectChange} 
                   className="w-full px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] text-[15px] text-[#111827] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-primary cursor-pointer"
                 >
                   <option value="">-- Select Subject --</option>
@@ -639,7 +618,6 @@ export default function Calendar() {
                 </select>
               </div>
 
-              {/* --- VÙNG CHỌN MÀU TÙY CHỈNH --- */}
               <div className="space-y-2 mt-4">
                 <label className="block text-[14px] font-medium text-[#111827] dark:text-white flex items-center gap-1.5">
                   <Palette className="w-4 h-4 text-[#64748B]" /> Label Color
@@ -680,7 +658,6 @@ export default function Calendar() {
                           ? 'text-white shadow-sm' 
                           : 'bg-white dark:bg-[#0F172A] text-[#6B7280] dark:text-[#CBD5E1] border-[#E5E7EB] dark:border-[#334155] hover:border-primary dark:hover:border-primary'
                         }`}
-                        // Hiển thị màu được chọn trên các nút "Thứ" đang active cho đẹp
                         style={isSelected ? { backgroundColor: selectedColor, borderColor: selectedColor } : {}}
                       >
                         {day.label}
@@ -720,7 +697,7 @@ export default function Calendar() {
                   onClick={handleSubmit}
                   disabled={saving}
                   className={`flex items-center gap-2 px-6 py-2.5 text-white font-semibold rounded-[10px] shadow-md transition-all hover:-translate-y-0.5 cursor-pointer ${saving ? 'opacity-50' : ''}`}
-                  style={{ backgroundColor: selectedColor }} // Đổi màu nút Save theo màu đang chọn luôn
+                  style={{ backgroundColor: selectedColor }}
                 >
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
                   Save Schedule
