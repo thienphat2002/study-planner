@@ -1,4 +1,4 @@
-import { Plus, BookOpen, Clock, TrendingUp, X, Loader2 } from 'lucide-react';
+import { Plus, BookOpen, Clock, X, Loader2, Trash2, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { useState, useEffect } from 'react';
@@ -7,6 +7,9 @@ import Input from '../components/Input';
 export default function Subjects() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#2563EB');
+
+  // --- STATE TOAST NOTIFICATION ---
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   // --- STATE DỮ LIỆU THỰC ---
   const [subjects, setSubjects] = useState([]); 
@@ -18,7 +21,20 @@ export default function Subjects() {
   const [iconEmoji, setIconEmoji] = useState('📚');
   const [loadingAdd, setLoadingAdd] = useState(false); 
 
+  // --- STATE XÓA MÔN HỌC ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const colors = ['#2563EB', '#7C3AED', '#22C55E', '#F59E0B', '#EF4444', '#06B6D4', '#8B5CF6', '#EC4899'];
+
+  // --- HELPER SHOW TOAST ---
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 4000); 
+  };
 
   const fetchSubjects = async () => {
     setLoadingData(true);
@@ -29,7 +45,7 @@ export default function Subjects() {
       });
       const result = await response.json();
       if (response.ok) {
-        setSubjects(result.data || []); // Lưu dữ liệu thật vào state
+        setSubjects(result.data || []); 
       }
     } catch (error) {
       console.error("Lỗi khi tải danh sách môn học:", error);
@@ -37,12 +53,24 @@ export default function Subjects() {
       setLoadingData(false);
     }
   };
+
   useEffect(() => {
     fetchSubjects();
   }, []);
 
+  // --- LOGIC THÊM MÔN HỌC ---
   const handleAddSubject = async () => {
-    if (!subjectName) return alert("Please enter subject name");
+    if (!subjectName.trim()) {
+      return showToast("Please enter a subject name!", "warning");
+    }
+
+    // 1. KIỂM TRA TRÙNG MÔN HỌC
+    const isDuplicate = subjects.some(
+      (sub) => sub.name.trim().toLowerCase() === subjectName.trim().toLowerCase()
+    );
+    if (isDuplicate) {
+      return showToast(`Subject "${subjectName.trim()}" already exists!`, "error");
+    }
     
     setLoadingAdd(true);
     const token = localStorage.getItem('token');
@@ -55,9 +83,10 @@ export default function Subjects() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          name: subjectName,
+          name: subjectName.trim(),
           weeklyStudyHours: parseInt(targetHours) || 0, 
-          colorCode: selectedColor 
+          colorCode: selectedColor,
+          icon: iconEmoji
         })
       });
 
@@ -67,20 +96,73 @@ export default function Subjects() {
         setTargetHours('');
         setIconEmoji('📚');
         fetchSubjects(); 
+        showToast("Subject added successfully!", "success");
       } else {
         const errorData = await response.json();
-        console.error("Server báo lỗi:", errorData);
-        alert("Lỗi: " + (errorData.message || "Không thể thêm môn học"));
+        showToast(errorData.message || "Failed to add subject", "error");
       }
     } catch (error) {
-      console.error("Lỗi khi thêm:", error);
+      showToast("Server connection error", "error");
     } finally {
       setLoadingAdd(false);
     }
   };
 
+  // --- LOGIC BẬT POPUP XÓA ---
+  const triggerDelete = (e, subject) => {
+    e.stopPropagation(); 
+    setSubjectToDelete(subject);
+    setIsDeleteModalOpen(true);
+  };
+
+  // --- LOGIC XÁC NHẬN XÓA (GỌI API) ---
+  const confirmDeleteSubject = async () => {
+    if (!subjectToDelete) return;
+    setLoadingDelete(true);
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/v1/subjects/deleteSubject/${subjectToDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setIsDeleteModalOpen(false);
+        setSubjectToDelete(null);
+        fetchSubjects(); 
+        showToast("Subject deleted successfully!", "success");
+      } else {
+        const errorData = await response.json();
+        showToast(errorData.message || "Failed to delete subject", "error");
+      }
+    } catch (error) {
+      showToast("Server connection error", "error");
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
+
   return (
     <div className="space-y-6 relative">
+      
+      {/* --- TOAST NOTIFICATION --- */}
+      {toast.show && (
+        <div className={`fixed top-24 right-8 z-[200] flex items-center gap-3 px-5 py-4 rounded-[12px] shadow-2xl animate-in slide-in-from-right-8 fade-in duration-300 ${
+          toast.type === 'error' ? 'bg-red-500 text-white' : 
+          toast.type === 'warning' ? 'bg-amber-500 text-white' : 
+          'bg-[#10B981] text-white'
+        }`}>
+          {toast.type === 'error' ? <AlertCircle size={22} /> : 
+           toast.type === 'warning' ? <AlertTriangle size={22} /> : 
+           <CheckCircle2 size={22} />}
+          <span className="font-medium text-[14px] pr-2">{toast.message}</span>
+          <button onClick={() => setToast({ show: false, message: '', type: 'success' })} className="ml-auto opacity-70 hover:opacity-100 cursor-pointer">
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="dark:text-white">Subjects</h1>
@@ -103,7 +185,7 @@ export default function Subjects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {subjects.map((subject) => (
-            <Card key={subject.id} className="p-6 hover:shadow-xl transition-shadow cursor-pointer group">
+            <Card key={subject.id} className="p-6 hover:shadow-xl transition-shadow cursor-pointer group relative">
               <div className="flex items-start justify-between mb-4">
                 <div 
                   className="w-12 h-12 rounded-[12px] flex items-center justify-center text-2xl dark:opacity-80" 
@@ -111,10 +193,21 @@ export default function Subjects() {
                 >
                   {subject.icon || '📚'}
                 </div>
-                <div 
-                  className="w-2 h-2 rounded-full group-hover:scale-150 transition-transform" 
-                  style={{ backgroundColor: subject.colorCode || '#2563EB' }}
-                ></div>
+
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={(e) => triggerDelete(e, subject)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 dark:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 shadow-sm"
+                    title="Delete Subject"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <div 
+                    className="w-2 h-2 rounded-full group-hover:scale-150 transition-transform" 
+                    style={{ backgroundColor: subject.colorCode || '#2563EB' }}
+                  ></div>
+                </div>
+
               </div>
               <h3 className="text-[20px] font-semibold text-[#111827] dark:text-white mb-4">{subject.name}</h3>
               <div className="mb-4">
@@ -137,7 +230,6 @@ export default function Subjects() {
                     <Clock className="w-4 h-4 text-[#6B7280] dark:text-[#94A3B8]" />
                     <span className="text-[12px] text-[#6B7280] dark:text-[#94A3B8]">Study Hours</span>
                   </div>
-                  {/* SỬA THÀNH weeklyStudyHours */}
                   <p className="text-[16px] font-semibold text-[#111827] dark:text-white">
                     {subject.weeklyStudyHours || 0}h
                   </p>
@@ -147,7 +239,6 @@ export default function Subjects() {
                     <BookOpen className="w-4 h-4 text-[#6B7280] dark:text-[#94A3B8]" />
                     <span className="text-[12px] text-[#6B7280] dark:text-[#94A3B8]">Tasks</span>
                   </div>
-                  {/* SỬA THÀNH totalTasks */}
                   <p className="text-[16px] font-semibold text-[#111827] dark:text-white">
                     {subject.totalTasks || 0}
                   </p>
@@ -171,6 +262,40 @@ export default function Subjects() {
         </div>
       )}
 
+      {/* --- POPUP XÁC NHẬN XÓA MÔN HỌC --- */}
+      {isDeleteModalOpen && subjectToDelete && (
+        <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] border dark:border-[#334155] rounded-3xl p-8 w-full max-w-[440px] shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-[#FEF2F2] dark:bg-[#451a1a] rounded-full flex items-center justify-center mb-6">
+                <AlertTriangle className="w-8 h-8 text-[#EF4444]" />
+              </div>
+              <h2 className="text-[24px] font-bold text-[#111827] dark:text-white mb-2">Delete Subject?</h2>
+              <p className="text-[#6B7280] dark:text-[#94A3B8] text-[15px] leading-relaxed">
+                Are you sure you want to delete <span className="font-semibold text-gray-800 dark:text-gray-200">"{subjectToDelete.name}"</span>? All related tasks might also be affected. This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex gap-3 mt-10">
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 px-6 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] text-[#475569] dark:text-[#CBD5E1] font-bold rounded-xl border border-[#E5E7EB] dark:border-[#334155] hover:bg-[#F1F5F9] dark:hover:bg-[#1e293b] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteSubject}
+                disabled={loadingDelete}
+                className={`flex-1 flex justify-center items-center px-6 py-3 bg-[#EF4444] text-white font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-[#dc2626] hover:-translate-y-0.5 transition-all cursor-pointer ${loadingDelete ? 'opacity-50' : ''}`}
+              >
+                {loadingDelete ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- POPUP THÊM MỚI MÔN HỌC --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] dark:border dark:border-[#334155] rounded-3xl p-8 w-full max-w-[450px] shadow-2xl relative animate-in fade-in zoom-in duration-200">
@@ -187,7 +312,23 @@ export default function Subjects() {
                 <Input label="Target (hours/week)" type="number" placeholder="10" value={targetHours} onChange={(e) => setTargetHours(e.target.value)} />
                 <Input label="Icon (Emoji)" placeholder="⚛️" value={iconEmoji} onChange={(e) => setIconEmoji(e.target.value)} />
               </div>
-              {/* Theme Color selector giữ nguyên... */}
+              
+              <div>
+                <label className="block text-[14px] font-medium text-[#111827] dark:text-gray-200 mb-3">Theme Color</label>
+                <div className="flex gap-3">
+                  {colors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-8 h-8 rounded-full hover:scale-110 transition-all cursor-pointer shadow-sm ${
+                        selectedColor === color ? 'ring-2 ring-offset-2 dark:ring-offset-[#1E293B]' : ''
+                      }`}
+                      style={{ backgroundColor: color, ringColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <div className="pt-5 border-t border-[#f1f5f9] dark:border-[#334155] flex justify-end gap-3 mt-6">
                 <Button variant="outline" onClick={() => setIsModalOpen(false)} className="cursor-pointer px-6 dark:border-[#475569] dark:text-[#CBD5E1]">Cancel</Button>
                 <button 
