@@ -7,7 +7,6 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 
 export default function Login() {
-  // ÉP TRANG NÀY LUÔN Ở LIGHT MODE
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     document.body.classList.remove('dark');
@@ -21,7 +20,6 @@ export default function Login() {
   
   const navigate = useNavigate();
 
-  // FIX LỖI TYPESCRIPT BẰNG CÁCH THÊM ": React.SyntheticEvent"
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     let isValid = true;

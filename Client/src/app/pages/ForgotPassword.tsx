@@ -5,12 +5,9 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 
 export default function ForgotPassword() {
-  // ÉP TRANG NÀY LUÔN Ở LIGHT MODE
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     document.body.classList.remove('dark');
-
-    // Chống lỗi chớp đen khi F5
     const timer = setTimeout(() => {
       document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark');
@@ -71,7 +68,6 @@ export default function ForgotPassword() {
     return (
       <AuthLayout>
         <div className="flex flex-col gap-6 !bg-white">
-          {/* TIÊU ĐỀ SMART STUDY PLANNER TRONG TRẠNG THÁI SUCCESS */}
           <div>
             <h1 className="text-2xl font-bold !text-primary">
               Smart Study Planner
@@ -101,8 +97,6 @@ export default function ForgotPassword() {
   return (
     <AuthLayout>
       <div className="flex flex-col gap-6 !bg-white">
-        
-        {/* TIÊU ĐỀ SMART STUDY PLANNER */}
         <div>
           <h1 className="text-2xl font-bold !text-primary">
             Smart Study Planner

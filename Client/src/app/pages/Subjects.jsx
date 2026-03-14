@@ -20,7 +20,6 @@ export default function Subjects() {
 
   const colors = ['#2563EB', '#7C3AED', '#22C55E', '#F59E0B', '#EF4444', '#06B6D4', '#8B5CF6', '#EC4899'];
 
-  // 1. HÀM LẤY DANH SÁCH MÔN HỌC TỪ SERVER
   const fetchSubjects = async () => {
     setLoadingData(true);
     const token = localStorage.getItem('token');
@@ -38,13 +37,10 @@ export default function Subjects() {
       setLoadingData(false);
     }
   };
-
-  // Tự động gọi API khi vừa mở trang
   useEffect(() => {
     fetchSubjects();
   }, []);
 
-  // 2. HÀM THÊM MÔN HỌC MỚI
   const handleAddSubject = async () => {
     if (!subjectName) return alert("Please enter subject name");
     
@@ -60,10 +56,8 @@ export default function Subjects() {
         },
         body: JSON.stringify({
           name: subjectName,
-          // ĐỔI TÊN BIẾN CHO KHỚP VỚI BACKEND
           weeklyStudyHours: parseInt(targetHours) || 0, 
           colorCode: selectedColor 
-          // Mình bỏ 'icon' đi vì BE hiện tại của bạn không hề lưu icon
         })
       });
 
@@ -94,14 +88,13 @@ export default function Subjects() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-[8px] hover:bg-[#1d4ed8] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
+          className="flex flex-row items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-[8px] hover:bg-primary/90 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
         >
           <Plus className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
           <span className="font-semibold text-[15px] leading-none">Add Subject</span>
         </button>
       </div>
 
-      {/* HIỂN THỊ LOADING KHI ĐANG TẢI DỮ LIỆU */}
       {loadingData ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
@@ -116,7 +109,6 @@ export default function Subjects() {
                   className="w-12 h-12 rounded-[12px] flex items-center justify-center text-2xl dark:opacity-80" 
                   style={{ backgroundColor: `${subject.colorCode || '#2563EB'}20` }}
                 >
-                  {/* Dùng icon của subject hoặc mặc định là cuốn sách */}
                   {subject.icon || '📚'}
                 </div>
                 <div 
@@ -164,7 +156,6 @@ export default function Subjects() {
             </Card>
           ))}
 
-          {/* Nút Add Card luôn nằm cuối danh sách */}
           <Card 
             className="p-6 border-2 border-dashed border-[#E5E7EB] dark:border-[#334155] hover:border-primary dark:hover:border-primary bg-transparent hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]/20 transition-all cursor-pointer flex items-center justify-center min-h-[280px]"
             onClick={() => setIsModalOpen(true)}
@@ -180,7 +171,6 @@ export default function Subjects() {
         </div>
       )}
 
-      {/* MODAL NHẬP LIỆU (Giữ nguyên phần này như bạn đã có) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] dark:border dark:border-[#334155] rounded-3xl p-8 w-full max-w-[450px] shadow-2xl relative animate-in fade-in zoom-in duration-200">

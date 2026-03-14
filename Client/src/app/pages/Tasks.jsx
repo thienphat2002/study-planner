@@ -45,7 +45,6 @@ export default function Tasks() {
 
   const priorityColors = { high: 'border-l-[#EF4444]', medium: 'border-l-[#F59E0B]', low: 'border-l-[#22C55E]' };
 
-  // 1. FETCH DỮ LIỆU TỪ BACKEND
   const fetchData = async () => {
     setLoadingData(true);
     const token = localStorage.getItem('token');
@@ -72,7 +71,6 @@ export default function Tasks() {
     fetchData();
   }, []);
 
-  // 2. HÀM THÊM CÔNG VIỆC MỚI
   const handleCreateTask = async () => {
     if (!newTaskTitle) return alert("Task title is required");
     
@@ -112,7 +110,6 @@ export default function Tasks() {
     }
   };
 
-  // --- HÀM XÓA TASK ---
   const confirmDeleteTask = async () => {
     if (!taskToDelete) return;
     
@@ -130,7 +127,7 @@ export default function Tasks() {
       if (response.ok) {
         setDeleteModalOpen(false);
         setTaskToDelete(null);
-        fetchData(); // Tải lại danh sách sau khi xóa
+        fetchData(); 
       } else {
         const errorData = await response.json();
         alert(errorData.message || "Failed to delete task");
@@ -148,12 +145,9 @@ export default function Tasks() {
     setDeleteModalOpen(true);
   };
 
-  // --- HÀM MỚI: ĐỔI TRẠNG THÁI TASK (TICK CHECKBOX) ---
   const handleToggleStatus = async (task, e) => {
-    e.stopPropagation(); // Ngăn chặn sự kiện click lan ra ngoài
+    e.stopPropagation(); 
     const token = localStorage.getItem('token');
-    
-    // Nếu đang là DONE thì đổi thành TODO, và ngược lại
     const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
 
     try {
@@ -167,7 +161,7 @@ export default function Tasks() {
       });
 
       if (response.ok) {
-        fetchData(); // Gọi lại API để danh sách tự động cập nhật vị trí
+        fetchData();
       } else {
         const errorData = await response.json();
         alert(errorData.message || "Lỗi khi cập nhật trạng thái");
@@ -177,7 +171,6 @@ export default function Tasks() {
     }
   };
 
-  // 3. PHÂN LOẠI & LỌC DỮ LIỆU
   const getFilteredTasks = () => {
     let result = { todo: [], inProgress: [], completed: [] };
     
@@ -231,7 +224,6 @@ export default function Tasks() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         
-                        {/* --- Ô VUÔNG CHECKBOX ĐÃ ĐƯỢC GẮN SỰ KIỆN CLICK --- */}
                         <div 
                           onClick={(e) => handleToggleStatus(task, e)}
                           className={`w-5 h-5 border-2 rounded-[4px] flex items-center justify-center transition-colors cursor-pointer ${status === 'completed' ? 'bg-[#22C55E] border-[#22C55E]' : 'border-primary hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]'}`}
@@ -532,7 +524,6 @@ export default function Tasks() {
                   </select>
                 </div>
 
-                {/* --- Ô CHỌN NGÀY ĐÃ ĐƯỢC FIX LỖI --- */}
                 <div className="space-y-2">
                   <label className="block text-[14px] font-medium text-[#111827] dark:text-white transition-colors">
                     Due Date

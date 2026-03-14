@@ -5,8 +5,6 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 
 export default function Analytics() {
   const [loading, setLoading] = useState(true);
-  
-  // 2. Cập nhật state: Thêm totalClassesCount vào stats
   const [analyticsData, setAnalyticsData] = useState({
     stats: { totalHours: 0, totalTasksCount: 0, completedTasksCount: 0, avgDailyHours: 0, totalClassesCount: 0 },
     weeklyStudyData: [],
@@ -14,7 +12,6 @@ export default function Analytics() {
     taskCompletionData: []
   });
 
-  // Gọi API lấy dữ liệu
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -46,7 +43,6 @@ export default function Analytics() {
 
   const { stats, weeklyStudyData, subjectDistribution, taskCompletionData } = analyticsData;
 
-  // 3. Cập nhật topStats: Đổi thẻ thứ 3 thành "Classes Attended"
   const topStats = [
     { icon: Clock, label: 'Total Study Time', value: `${stats.totalHours}h`, change: 'Current', color: '#2563EB', bg: '#EFF6FF', darkBg: '#1e3a8a' },
     { icon: CheckCircle, label: 'Tasks Completed', value: `${stats.completedTasksCount}`, change: 'Current', color: '#22C55E', bg: '#F0FDF4', darkBg: '#14532d' },

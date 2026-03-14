@@ -13,7 +13,7 @@ export default function Dashboard() {
   // --- STATE LƯU DỮ LIỆU THỰC TẾ ---
   const [loading, setLoading] = useState(true);
   const [realTasks, setRealTasks] = useState([]);
-  const [todayClasses, setTodayClasses] = useState([]); // State lưu lịch học hôm nay
+  const [todayClasses, setTodayClasses] = useState([]); 
   const [activeSubjectsCount, setActiveSubjectsCount] = useState(0);
   const [dashboardStats, setDashboardStats] = useState({
     studyHours: 0,
@@ -60,7 +60,7 @@ export default function Dashboard() {
           fetch('http://localhost:5000/api/v1/tasks/getTask', { headers }),
           fetch('http://localhost:5000/api/v1/subjects/getSubject', { headers }),
           fetch('http://localhost:5000/api/v1/tasks/weekly-progress', { headers }),
-          fetch('http://localhost:5000/api/v1/schedule/today', { headers }) // Gọi API lịch học hôm nay
+          fetch('http://localhost:5000/api/v1/schedule/today', { headers }) 
         ]);
 
         let activeSubs = 0;
@@ -90,7 +90,6 @@ export default function Dashboard() {
           }
         }
 
-        // Lấy dữ liệu lịch học hôm nay
         if (scheduleRes.ok) {
           const scheduleData = await scheduleRes.json();
           setTodayClasses(scheduleData || []);
@@ -132,7 +131,6 @@ export default function Dashboard() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  // Helper chuyển đổi "14:30" thành "2:30 PM"
   const formatTo12Hour = (time24) => {
     if (!time24) return '';
     const [h, m] = time24.split(':');
@@ -142,7 +140,6 @@ export default function Dashboard() {
     return `${hour}:${m} ${ampm}`;
   };
 
-  // Helper format nguyên chuỗi "09:00 - 11:30" thành "9:00 AM - 11:30 AM"
   const formatTimeRange = (timeRangeStr) => {
     if (!timeRangeStr) return '';
     const parts = timeRangeStr.split(' - ');
@@ -202,7 +199,6 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CARD BÊN TRÁI: UPCOMING TASKS */}
         <Card className="lg:col-span-2 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[18px] font-bold text-[#111827] dark:text-white">Upcoming Tasks</h2>
@@ -342,7 +338,6 @@ export default function Dashboard() {
                 ) : (
                   todayClasses.map((item, index) => {
                     const color = item.color || '#2563EB';
-                    // Lấy phần giờ bắt đầu (vd: từ "09:00 - 11:30" => "09:00")
                     const startTimeRaw = item.time.split(' - ')[0];
                     
                     return (

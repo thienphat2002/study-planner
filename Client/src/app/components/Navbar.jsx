@@ -3,9 +3,6 @@ import { Link, useNavigate } from "react-router";
 import { LogOut } from "lucide-react";
 import { useState, useEffect, useRef } from 'react';
 
-// ==========================================
-// 1. TẠO HỆ THỐNG CHUÔNG THÔNG BÁO THẬT
-// ==========================================
 function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0); 
@@ -42,11 +39,8 @@ function NotificationBell() {
         let allNotis = [];
         const now = new Date();
 
-        // --- 1. XỬ LÝ THÔNG BÁO TỪ TASKS ---
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
-          
-          // A. Lấy 3 Task VỪA HOÀN THÀNH
           const completedTasks = tasksData
             .filter(t => t.status === 'DONE')
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
@@ -92,7 +86,6 @@ function NotificationBell() {
           allNotis = [...allNotis, ...upcomingTasks];
         }
 
-        // --- 2. XỬ LÝ THÔNG BÁO TỪ ANALYTICS (POMODORO & THÀNH TỰU) ---
         if (analyticsRes.ok) {
           const analyticsData = await analyticsRes.json();
           if (analyticsData.data.recentSessions) {
@@ -110,7 +103,6 @@ function NotificationBell() {
             allNotis = [...allNotis, ...sessions];
           }
 
-          // B. Kiểm tra Huy hiệu (Achievements)
           const ach = analyticsData.data.achievements;
           if (ach) {
             if (ach.sevenDayStreak) {
@@ -128,7 +120,6 @@ function NotificationBell() {
           }
         }
 
-        // --- 3. GỘP VÀ SẮP XẾP TỪ MỚI NHẤT ĐẾN CŨ NHẤT ---
         allNotis.sort((a, b) => b.timestamp - a.timestamp);
         const finalNotifications = allNotis.slice(0, 6);
         setNotifications(finalNotifications);
@@ -156,14 +147,12 @@ function NotificationBell() {
 
   return (
     <div className="relative flex items-center" ref={dropdownRef}>
-      {/* Nút Bấm Chuông */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
       >
         <Bell className="w-5 h-5" />
         
-        {/* Chấm đỏ báo số lượng */}
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#EF4444] text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E293B] animate-pulse">
             {unreadCount}
@@ -171,7 +160,6 @@ function NotificationBell() {
         )}
       </button>
 
-      {/* Bảng Dropdown xổ xuống */}
       {isOpen && (
         <div className="absolute right-0 top-[50px] w-80 sm:w-96 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-[16px] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           
@@ -223,9 +211,6 @@ function NotificationBell() {
   );
 }
 
-// ==========================================
-// 2. NAVBAR CHÍNH
-// ==========================================
 export default function Navbar() {
   const navigate = useNavigate();
 
@@ -279,7 +264,6 @@ export default function Navbar() {
       
       <div className="flex items-center gap-2">
         
-        {/* --- NHÚNG COMPONENT CHUÔNG VÀO ĐÂY --- */}
         <NotificationBell />
         
         <div className="flex items-center gap-0 ml-2"> 
@@ -300,7 +284,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Log out */}
           <button 
             onClick={handleLogout}
             className="p-2 text-[#EF4444] hover:bg-[#FEF2F2] dark:hover:bg-[#EF4444]/10 rounded-[8px] transition-colors cursor-pointer ml-1"

@@ -29,10 +29,8 @@ export default function Calendar() {
   const [recurrence, setRecurrence] = useState('EVERY_WEEK');
   const [selectedColor, setSelectedColor] = useState('#2563EB'); // Default color
 
-  // Danh sách màu gợi ý
   const PRESET_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
 
-  // --- CẤU HÌNH LỊCH ---
   const weekDays = [
     { id: 1, label: 'Mon', full: 'Monday' },
     { id: 2, label: 'Tue', full: 'Tuesday' },
@@ -201,7 +199,7 @@ export default function Calendar() {
           endTime: endTime,
           room: room,
           recurrence: recurrence,
-          color: selectedColor // GỬI MÃ MÀU LÊN BACKEND
+          color: selectedColor 
         })
       });
 
@@ -213,7 +211,7 @@ export default function Calendar() {
         setEndTime('');
         setRoom('');
         setRecurrence('EVERY_WEEK');
-        setSelectedColor('#2563EB'); // Reset màu
+        setSelectedColor('#2563EB'); 
         fetchData(); 
         showToast("Tạo lịch học mới thành công!", "success");
       } else {
@@ -228,7 +226,6 @@ export default function Calendar() {
     }
   };
 
-  // Khi chọn môn học, nếu môn học có màu sẵn thì tự động đổi bảng màu theo màu của môn đó
   const handleSubjectChange = (e) => {
     const subId = e.target.value;
     setSelectedSubject(subId);
@@ -325,7 +322,6 @@ export default function Calendar() {
     if (blockHeight < 30) blockHeight = 30;
     if (isNaN(topPosition) || topPosition < TOP_OFFSET) return null;
 
-    // ƯU TIÊN 1: Lấy màu tùy chỉnh của lịch học. Nếu không có mới lấy màu của môn học.
     const color = schedule.color || schedule.subject?.colorCode || '#2563EB';
 
     return (
@@ -395,7 +391,6 @@ export default function Calendar() {
 
   return (
     <div className="space-y-6 relative h-[calc(100vh-100px)] flex flex-col">
-      {/* 1. HEADER ĐIỀU HƯỚNG */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] rounded-[10px] p-1 shadow-sm">
@@ -660,7 +655,6 @@ export default function Calendar() {
                       style={{ backgroundColor: c }}
                     />
                   ))}
-                  {/* Color picker chọn tự do */}
                   <div className="relative w-7 h-7 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600 cursor-pointer flex-shrink-0 ml-2" title="Custom Color">
                     <input 
                       type="color" 

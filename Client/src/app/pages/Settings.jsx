@@ -5,8 +5,6 @@ import { useState, useEffect } from 'react';
 export default function Settings() {
   const [showToast, setShowToast] = useState(false); 
   const [showResetModal, setShowResetModal] = useState(false); 
-
-  // --- 1. ĐÃ BỎ CÁC STATE LIÊN QUAN ĐẾN EMAIL ---
   const [notifications, setNotifications] = useState({
     push: true, taskReminders: true, studyReminders: false
   });
@@ -14,7 +12,6 @@ export default function Settings() {
   const [appearance, setAppearance] = useState('light');
   const [primaryColor, setPrimaryColor] = useState('#2563EB');
   const [fontSize, setFontSize] = useState('Medium (Default)');
-  
   const [preferences, setPreferences] = useState({
     pomodoro: 25, shortBreak: 5, longBreak: 15, taskPriority: 'Medium', weekStart: 'Monday'
   });
@@ -251,7 +248,6 @@ export default function Settings() {
           <h2 className="mb-6 dark:text-white">Notifications</h2>
           
           <div className="space-y-3">
-            {/* 2. ĐÃ XÓA MỤC EMAIL VÀ WEEKLY REPORT */}
             {[
               { key: 'push', label: 'Push Notifications', description: 'Get notifications on your device' },
               { key: 'taskReminders', label: 'Task Reminders', description: 'Reminders for upcoming tasks' },
