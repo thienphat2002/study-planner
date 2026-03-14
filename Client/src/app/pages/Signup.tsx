@@ -78,34 +78,30 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center !bg-[#F8FAFC]">
+    <div className="min-h-screen w-full flex items-center justify-center py-6 !bg-[#F8FAFC]">
+      {/* Sửa Responsive khung chính ở đây */}
       <div 
-        className="flex overflow-hidden !bg-white"
-        style={{
-          width: '1100px',
-          height: '720px',
-          borderRadius: '24px',
-          boxShadow: '0px 10px 30px rgba(0,0,0,0.08)'
-        }}
+        className="flex flex-col md:flex-row overflow-hidden !bg-white w-[90%] max-w-[1100px] h-[90vh] md:h-[720px] shadow-[0px_10px_30px_rgba(0,0,0,0.08)] rounded-[24px]"
       >
-        <div className="w-1/2 overflow-y-auto flex flex-col !bg-white" style={{ padding: '48px' }}>
-          <div className="flex flex-col gap-6">
+        {/* Form bên trái full width trên mobile */}
+        <div className="w-full md:w-1/2 overflow-y-auto flex flex-col !bg-white p-6 sm:p-8 md:p-12 custom-scrollbar">
+          <div className="flex flex-col gap-5 md:gap-6">
             <div>
-              <h1 className="text-2xl font-bold !text-primary">
+              <h1 className="text-[20px] md:text-[24px] font-bold !text-primary">
                 Smart Study Planner
               </h1>
             </div>
 
             <div className="flex flex-col gap-2">
-              <h2 className="text-[32px] font-bold !text-[#111827]">
+              <h2 className="text-[28px] md:text-[32px] font-bold !text-[#111827]">
                 Create Account
               </h2>
-              <p className="text-base !text-[#6B7280]">
+              <p className="text-[14px] md:text-[16px] !text-[#6B7280]">
                 Start organizing your study life today.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6 mt-2">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 md:gap-6 mt-2">
               
               {/* Full Name */}
               <div className="flex flex-col gap-1">
@@ -189,7 +185,7 @@ export default function Signup() {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Enter confirm password"
+                    placeholder="Re-enter new password"
                     value={confirmPassword}
                     label=""
                     error={confirmPasswordError}
@@ -221,7 +217,7 @@ export default function Signup() {
               </Button>
             </form>
 
-            <div className="mt-4" />
+            <div className="mt-2 md:mt-4" />
 
             {/* Bottom Section */}
             <div className="text-center pb-6">
@@ -235,10 +231,10 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* Right Panel - Gradient Hero */}
+        {/* Ẩn Banner bằng class 'hidden md:flex' */}
         <div 
-          className="w-1/2 flex items-center justify-center relative"
-          style={{ background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)', borderRadius: '24px' }}
+          className="hidden md:flex w-1/2 items-center justify-center relative"
+          style={{ background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)', borderRadius: '0 24px 24px 0' }}
         >
           <div className="px-12 text-center z-10">
             <h3 className="text-[28px] font-bold text-white mb-4 leading-tight">

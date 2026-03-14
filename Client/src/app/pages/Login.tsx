@@ -64,28 +64,24 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center !bg-[#F8FAFC]">
+      {/* Sửa Responsive khung chính ở đây */}
       <div 
-        className="!bg-white overflow-hidden flex"
-        style={{
-          width: "1100px",
-          height: "600px",
-          borderRadius: "24px",
-          boxShadow: "0px 10px 30px rgba(0,0,0,0.08)"
-        }}
+        className="!bg-white overflow-hidden flex flex-col md:flex-row w-[90%] max-w-[1100px] min-h-[500px] md:h-[600px] shadow-[0px_10px_30px_rgba(0,0,0,0.08)] rounded-[24px]"
       >
-        <div className="w-1/2 flex flex-col !bg-white" style={{ padding: "48px" }}>
-          <div className="mb-8">
-            <h1 className="text-[24px] font-bold !text-primary">
+        {/* Sửa form chiếm full width trên mobile, padding nhỏ lại */}
+        <div className="w-full md:w-1/2 flex flex-col !bg-white p-6 sm:p-8 md:p-12">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-[20px] md:text-[24px] font-bold !text-primary">
               Smart Study Planner
             </h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6 flex-1">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 md:gap-6 flex-1">
             <div className="space-y-2">
-              <h2 className="text-[32px] font-bold !text-[#111827]">
+              <h2 className="text-[28px] md:text-[32px] font-bold !text-[#111827]">
                 Sign in
               </h2>
-              <p className="text-[16px] !text-[#6B7280]">
+              <p className="text-[14px] md:text-[16px] !text-[#6B7280]">
                 Built for busy students like you.
               </p>
             </div>
@@ -177,9 +173,10 @@ export default function Login() {
           </form>
         </div>
 
+        {/* Ẩn Banner bằng class 'hidden md:flex' */}
         <div 
-          className="w-1/2 flex flex-col items-center justify-center text-center p-12 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)", borderRadius: "24px" }}
+          className="hidden md:flex w-1/2 flex-col items-center justify-center text-center p-12 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)", borderRadius: "0 24px 24px 0" }}
         >
           <div 
             className="absolute inset-0 opacity-10"

@@ -9,7 +9,6 @@ function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
 
-  // Hàm tính thời gian siêu chuẩn xác
   const timeAgo = (timestamp) => {
     const now = new Date().getTime();
     const diffInSeconds = Math.floor((now - timestamp) / 1000);
@@ -24,7 +23,6 @@ function NotificationBell() {
     return `${diffInDays} days ago`;
   };
 
-  // FETCH DỮ LIỆU TỪ 2 API (TASKS & ANALYTICS) VÀ TRỘN LẠI
   useEffect(() => {
     const fetchNotifications = async () => {
       const token = localStorage.getItem('token');
@@ -46,19 +44,13 @@ function NotificationBell() {
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
             .slice(0, 3)
             .map(t => ({
-              id: `task-done-${t.id}`,
-              type: 'success',
-              title: 'Task Completed!',
+              id: `task-done-${t.id}`, type: 'success', title: 'Task Completed!',
               desc: `You have successfully completed "${t.title}".`,
-              timestamp: new Date(t.updatedAt).getTime(),
-              time: timeAgo(new Date(t.updatedAt).getTime()),
-              icon: CheckCircle2,
-              color: 'text-green-500',
-              bg: 'bg-green-100 dark:bg-green-500/20'
+              timestamp: new Date(t.updatedAt).getTime(), time: timeAgo(new Date(t.updatedAt).getTime()),
+              icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-500/20'
             }));
           allNotis = [...allNotis, ...completedTasks];
 
-          // B. Lấy các Task SẮP ĐẾN HẠN (Trong 24h tới) và CHƯA HOÀN THÀNH
           const upcomingTasks = tasksData
             .filter(t => t.status !== 'DONE' && t.deadline) 
             .filter(t => {
@@ -66,22 +58,16 @@ function NotificationBell() {
               const taskDateString = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}-${String(taskDate.getDate()).padStart(2, '0')}`;
               const today = new Date();
               const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
+              const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
               const tomorrowString = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
               return taskDateString === todayString || taskDateString === tomorrowString;
             })
             .slice(0, 2)
             .map(t => ({
-              id: `task-urgent-${t.id}`,
-              type: 'urgent',
-              title: 'Deadline Approaching!',
+              id: `task-urgent-${t.id}`, type: 'urgent', title: 'Deadline Approaching!',
               desc: `"${t.title}" is due soon. Hurry up!`,
-              timestamp: now.getTime() + 1000,
-              time: 'Action required',
-              icon: AlertCircle,
-              color: 'text-red-500',
-              bg: 'bg-red-100 dark:bg-red-500/20'
+              timestamp: now.getTime() + 1000, time: 'Action required',
+              icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-500/20'
             }));
           allNotis = [...allNotis, ...upcomingTasks];
         }
@@ -90,15 +76,10 @@ function NotificationBell() {
           const analyticsData = await analyticsRes.json();
           if (analyticsData.data.recentSessions) {
             const sessions = analyticsData.data.recentSessions.slice(0, 2).map(s => ({
-              id: `pomodoro-${s.id}`,
-              type: 'info',
-              title: 'Pomodoro Completed',
+              id: `pomodoro-${s.id}`, type: 'info', title: 'Pomodoro Completed',
               desc: `You focused for ${s.duration} minutes. Great job!`,
-              timestamp: new Date(s.createdAt).getTime(),
-              time: timeAgo(new Date(s.createdAt).getTime()),
-              icon: Clock,
-              color: 'text-blue-500',
-              bg: 'bg-blue-100 dark:bg-blue-500/20'
+              timestamp: new Date(s.createdAt).getTime(), time: timeAgo(new Date(s.createdAt).getTime()),
+              icon: Clock, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/20'
             }));
             allNotis = [...allNotis, ...sessions];
           }
@@ -149,19 +130,19 @@ function NotificationBell() {
     <div className="relative flex items-center" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2.5 text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
+        className="relative p-2 md:p-2.5 text-[#6B7280] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-5 h-5 md:w-6 md:h-6" />
         
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#EF4444] text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E293B] animate-pulse">
+          <span className="absolute top-1 right-1 md:top-1.5 md:right-1.5 w-4 h-4 bg-[#EF4444] text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E293B] animate-pulse">
             {unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-[50px] w-80 sm:w-96 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-[16px] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 sm:-right-4 top-[50px] w-[calc(100vw-2rem)] sm:w-80 md:w-96 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-[16px] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] dark:border-[#334155]">
             <h3 className="font-bold text-[#111827] dark:text-white">Notifications</h3>
@@ -257,29 +238,33 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E5E7EB] dark:border-[#334155] flex items-center justify-between px-8 fixed top-0 left-0 right-0 z-50 transition-colors duration-300">
-      <div className="flex items-center gap-6">
-        <h1 className="text-[20px] font-semibold text-[#111827] dark:text-white transition-colors">Smart Study Planner</h1>
+    <nav className="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E5E7EB] dark:border-[#334155] flex items-center justify-between px-4 md:px-8 fixed top-0 left-0 right-0 z-50 transition-colors duration-300">
+      <div className="flex items-center gap-2 md:gap-6">
+        {/* Rút gọn tên trên mobile để không bị đè */}
+        <h1 className="text-[16px] sm:text-[18px] md:text-[20px] font-semibold text-[#111827] dark:text-white transition-colors truncate max-w-[140px] sm:max-w-none">
+          Smart Study Planner
+        </h1>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2">
         
         <NotificationBell />
         
-        <div className="flex items-center gap-0 ml-2"> 
+        <div className="flex items-center gap-0 ml-1 md:ml-2"> 
           {/* Profile */}
           <Link 
             to="/profile" 
-            className="flex items-center gap-2 py-1.5 px-2 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
+            className="flex items-center gap-2 py-1.5 px-1.5 md:px-2 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
           >
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-7 h-7 md:w-8 md:h-8 bg-primary rounded-full flex items-center justify-center overflow-hidden">
               {userData.avatarUrl ? (
                 <img src={userData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-[14px] font-medium text-white">{userData.avatar}</span>
+                <span className="text-[12px] md:text-[14px] font-medium text-white">{userData.avatar}</span>
               )}
             </div>
-            <span className="text-[14px] font-medium text-[#111827] dark:text-white pr-1 transition-colors">
+            {/* Ẩn tên user trên mobile cực nhỏ để tiết kiệm chỗ */}
+            <span className="hidden sm:block text-[14px] font-medium text-[#111827] dark:text-white pr-1 transition-colors truncate max-w-[80px] md:max-w-[150px]">
               {userData.name}
             </span>
           </Link>
@@ -289,7 +274,7 @@ export default function Navbar() {
             className="p-2 text-[#EF4444] hover:bg-[#FEF2F2] dark:hover:bg-[#EF4444]/10 rounded-[8px] transition-colors cursor-pointer ml-1"
             title="Logout"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           
         </div>
