@@ -103,9 +103,6 @@ export default function Profile() {
       });
     }
 
-    // ===============================================================
-    // SIÊU LOGIC: TRỘN 3 LUỒNG DỮ LIỆU (TASKS, POMODORO, GOALS)
-    // ===============================================================
     const fetchRealData = async () => {
       const token = localStorage.getItem('token');
       try {
@@ -116,7 +113,6 @@ export default function Profile() {
 
         let activities = [];
 
-        // 1. NHÚNG TASK ĐÃ HOÀN THÀNH
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
           const completedTasks = tasksData
@@ -125,12 +121,11 @@ export default function Profile() {
               id: `task-${t.id}`,
               text: `Completed task "${t.title}"`,
               timestamp: new Date(t.updatedAt).getTime(),
-              color: '#22C55E' // Xanh lá
+              color: '#22C55E' 
             }));
           activities = [...activities, ...completedTasks];
         }
 
-        // 2. NHÚNG ANALYTICS & POMODORO SESSIONS
         if (analyticsRes.ok) {
           const analyticsData = await analyticsRes.json();
           const stats = analyticsData.data.stats;
@@ -155,34 +150,29 @@ export default function Profile() {
             return g;
           }));
 
-          // Kéo lịch sử Pomodoro vào (Nếu Backend đã cập nhật)
           if (analyticsData.data.recentSessions) {
             const sessions = analyticsData.data.recentSessions.map(s => ({
               id: `pomodoro-${s.id}`,
               text: `Focused for ${s.duration} minutes`,
               timestamp: new Date(s.createdAt).getTime(),
-              color: '#2563EB' // Xanh dương
+              color: '#2563EB' 
             }));
             activities = [...activities, ...sessions];
           }
         }
 
-        // 3. NHÚNG GOAL TỰ TẠO TỪ LOCAL STORAGE
         const localGoals = JSON.parse(localStorage.getItem('userGoals') || '[]');
         const customGoals = localGoals
-          .filter(g => !g.isAuto) // Lấy các goal bạn tự add bằng nút +
+          .filter(g => !g.isAuto) 
           .map(g => ({
             id: `goal-${g.id}`,
             text: `Set a new goal: "${g.title}"`,
-            timestamp: g.id, // ID của goal sinh bằng Date.now() nên nó chính là timestamp!
-            color: '#7C3AED' // Tím
+            timestamp: g.id, 
+            color: '#7C3AED'
           }));
         activities = [...activities, ...customGoals];
 
-        // 4. TRỘN VÀ SẮP XẾP CHUNG LẠI TỪ MỚI NHẤT ĐẾN CŨ NHẤT
         activities.sort((a, b) => b.timestamp - a.timestamp);
-        
-        // Cắt lấy đúng 4 hoạt động gần nhất để không làm tràn khung
         setRecentActivities(activities.slice(0, 4));
 
       } catch (error) {
@@ -226,7 +216,6 @@ export default function Profile() {
     const goalToAdd = {
       id: Date.now(), title: newGoal.title, current: 0, target: parseInt(newGoal.target), color: newGoal.color, isAuto: false 
     };
-    // Khi thêm goal mới vào State, LocalStorage sẽ tự lưu (vì useEffect lắng nghe biến goals)
     setGoals([...goals, goalToAdd]);
     setIsGoalModalOpen(false);
     setNewGoal({ title: '', target: '', color: '#2563EB' }); 

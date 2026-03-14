@@ -151,7 +151,25 @@ export default function Pomodoro() {
   const seconds = time % 60;
   const progress = ((modes[mode].duration - time) / modes[mode].duration) * 100;
 
-  // --- SỬA LỖI KHÔNG HIỆN TASK Ở IN PROGRESS ---
+  // --- HÀM HELPER: GỌI API ĐỔI TRẠNG THÁI TASK ---
+  const updateTaskStatusAPI = async (status) => {
+    if (!selectedTaskId) return;
+    const token = localStorage.getItem('token');
+    try {
+      await fetch(`http://localhost:5000/api/v1/tasks/updateStatus/${selectedTaskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+    } catch (error) {
+      console.error(`Lỗi khi chuyển trạng thái sang ${status}`, error);
+    }
+  };
+
+  // --- SỰ KIỆN KHI BẤM NÚT ---
   const handleStart = async () => {
     if (mode === 'focus' && !selectedTaskId) {
       return showToast("Please select a task to focus on before starting!", "warning");
@@ -162,21 +180,9 @@ export default function Pomodoro() {
       isRunning: true, time, mode, selectedTaskId, lastTick: Date.now()
     }));
 
-    // Tự động gọi API đẩy task sang mục IN_PROGRESS
+    // Bấm Start -> Đẩy task sang In Progress
     if (mode === 'focus' && selectedTaskId) {
-      const token = localStorage.getItem('token');
-      try {
-        await fetch(`http://localhost:5000/api/v1/tasks/updateStatus/${selectedTaskId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ status: 'IN_PROGRESS' })
-        });
-      } catch (error) {
-        console.error("Lỗi khi chuyển trạng thái In Progress", error);
-      }
+      updateTaskStatusAPI('IN_PROGRESS');
     }
   };
   
@@ -185,6 +191,11 @@ export default function Pomodoro() {
     localStorage.setItem('pomodoroTimer', JSON.stringify({
       isRunning: false, time, mode, selectedTaskId, lastTick: Date.now()
     }));
+
+    // Bấm Pause -> Trả task về lại Todo
+    if (mode === 'focus' && selectedTaskId) {
+      updateTaskStatusAPI('TODO');
+    }
   };
 
   const handleReset = () => { 
@@ -193,6 +204,11 @@ export default function Pomodoro() {
     localStorage.setItem('pomodoroTimer', JSON.stringify({
       isRunning: false, time: modes[mode].duration, mode, selectedTaskId, lastTick: Date.now()
     }));
+
+    // Bấm Reset -> Trả task về lại Todo
+    if (mode === 'focus' && selectedTaskId) {
+      updateTaskStatusAPI('TODO');
+    }
   };
   
   const handleModeChange = (newMode) => { 
