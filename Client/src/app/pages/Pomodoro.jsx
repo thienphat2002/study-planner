@@ -5,9 +5,40 @@ import Button from '../components/Button';
 
 export default function Pomodoro() {
   const [durations, setDurations] = useState({ focus: 25, shortBreak: 5, longBreak: 15 });
-  const [time, setTime] = useState(durations.focus * 60); 
-  const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState('focus'); 
+  
+  const modes = {
+    focus: { duration: durations.focus * 60, label: 'Focus Time', color: '#2563EB' },
+    shortBreak: { duration: durations.shortBreak * 60, label: 'Short Break', color: '#22C55E' },
+    longBreak: { duration: durations.longBreak * 60, label: 'Long Break', color: '#7C3AED' },
+  };
+
+  // --- LẤY DỮ LIỆU TỪ BỘ NHỚ KHI VỪA MỞ TRANG ĐỂ ĐỒNG HỒ KHÔNG BỊ RESET ---
+  const [mode, setMode] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('pomodoroTimer'));
+    return saved?.mode || 'focus';
+  });
+
+  const [time, setTime] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('pomodoroTimer'));
+    if (saved && saved.isRunning) {
+      // Nếu lúc nãy đang chạy, tính toán số giây đã trôi qua kể từ lúc chuyển trang
+      const elapsed = Math.floor((Date.now() - saved.lastTick) / 1000);
+      const remaining = saved.time - elapsed;
+      return remaining > 0 ? remaining : 0;
+    }
+    return saved?.time || (durations.focus * 60);
+  });
+
+  const [isRunning, setIsRunning] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('pomodoroTimer'));
+    return saved?.isRunning || false;
+  });
+
+  const [selectedTaskId, setSelectedTaskId] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('pomodoroTimer'));
+    return saved?.selectedTaskId || '';
+  });
+
   const [showSettings, setShowSettings] = useState(false);
   const [tempDurations, setTempDurations] = useState(durations);
   
@@ -15,9 +46,7 @@ export default function Pomodoro() {
     const savedData = localStorage.getItem('dailyPomodoro');
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      if (parsed.date === new Date().toLocaleDateString()) {
-        return parsed.count;
-      }
+      if (parsed.date === new Date().toLocaleDateString()) return parsed.count;
     }
     return 0; 
   });
@@ -31,21 +60,12 @@ export default function Pomodoro() {
 
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [tasks, setTasks] = useState([]); 
-  const [selectedTaskId, setSelectedTaskId] = useState(''); 
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const modes = {
-    focus: { duration: durations.focus * 60, label: 'Focus Time', color: '#2563EB' },
-    shortBreak: { duration: durations.shortBreak * 60, label: 'Short Break', color: '#22C55E' },
-    longBreak: { duration: durations.longBreak * 60, label: 'Long Break', color: '#7C3AED' },
-  };
-
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast({ show: false, message: '', type: 'success' });
-    }, 4000); 
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000); 
   };
 
   useEffect(() => {
@@ -70,10 +90,7 @@ export default function Pomodoro() {
   }, []);
 
   const saveStudySessionToDB = async (durationInMinutes) => {
-    if (!selectedTaskId) {
-      showToast("Please select a task to save the session.", "warning");
-      return; 
-    }
+    if (!selectedTaskId) return; 
 
     setIsSaving(true);
     const token = localStorage.getItem('token');
@@ -91,11 +108,8 @@ export default function Pomodoro() {
         })
       });
 
-      if (!response.ok) {
-        showToast("Failed to save study session", "error");
-      } else {
-        showToast(`Awesome! ${durationInMinutes} mins saved to your task.`, "success");
-      }
+      if (!response.ok) showToast("Failed to save study session", "error");
+      else showToast(`Awesome! ${durationInMinutes} mins saved to your task.`, "success");
     } catch (error) {
       showToast("Server connection error", "error");
     } finally {
@@ -103,23 +117,28 @@ export default function Pomodoro() {
     }
   };
 
+  // --- LOGIC LƯU LẠI THỜI GIAN MỖI GIÂY ---
   useEffect(() => {
     let interval = null;
     
     if (isRunning && time > 0) {
-      interval = setInterval(() => setTime(t => t - 1), 1000);
-    } else if (isRunning && time === 0) {
+      interval = setInterval(() => {
+        setTime(t => {
+          const newTime = t - 1;
+          // Lưu vào bộ nhớ ngầm để lỡ chuyển trang vẫn giữ nguyên
+          localStorage.setItem('pomodoroTimer', JSON.stringify({
+            isRunning: true, time: newTime, mode, selectedTaskId, lastTick: Date.now()
+          }));
+          return newTime;
+        });
+      }, 1000);
+    } else if (isRunning && time <= 0) {
       setIsRunning(false); 
-      
       if (mode === 'focus') {
         setSessionsCompleted(s => s + 1);
         saveStudySessionToDB(durations.focus); 
-        
-        if ((sessions + 1) % 4 === 0) {
-           handleModeChange('longBreak');
-        } else {
-           handleModeChange('shortBreak');
-        }
+        if ((sessions + 1) % 4 === 0) handleModeChange('longBreak');
+        else handleModeChange('shortBreak');
       } else {
         handleModeChange('focus');
       }
@@ -132,20 +151,57 @@ export default function Pomodoro() {
   const seconds = time % 60;
   const progress = ((modes[mode].duration - time) / modes[mode].duration) * 100;
 
-  const handleStart = () => {
+  // --- SỬA LỖI KHÔNG HIỆN TASK Ở IN PROGRESS ---
+  const handleStart = async () => {
     if (mode === 'focus' && !selectedTaskId) {
       return showToast("Please select a task to focus on before starting!", "warning");
     }
+    
     setIsRunning(true);
+    localStorage.setItem('pomodoroTimer', JSON.stringify({
+      isRunning: true, time, mode, selectedTaskId, lastTick: Date.now()
+    }));
+
+    // Tự động gọi API đẩy task sang mục IN_PROGRESS
+    if (mode === 'focus' && selectedTaskId) {
+      const token = localStorage.getItem('token');
+      try {
+        await fetch(`http://localhost:5000/api/v1/tasks/updateStatus/${selectedTaskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'IN_PROGRESS' })
+        });
+      } catch (error) {
+        console.error("Lỗi khi chuyển trạng thái In Progress", error);
+      }
+    }
   };
   
-  const handlePause = () => setIsRunning(false);
-  const handleReset = () => { setIsRunning(false); setTime(modes[mode].duration); };
+  const handlePause = () => {
+    setIsRunning(false);
+    localStorage.setItem('pomodoroTimer', JSON.stringify({
+      isRunning: false, time, mode, selectedTaskId, lastTick: Date.now()
+    }));
+  };
+
+  const handleReset = () => { 
+    setIsRunning(false); 
+    setTime(modes[mode].duration); 
+    localStorage.setItem('pomodoroTimer', JSON.stringify({
+      isRunning: false, time: modes[mode].duration, mode, selectedTaskId, lastTick: Date.now()
+    }));
+  };
   
   const handleModeChange = (newMode) => { 
     setMode(newMode); 
     setTime(modes[newMode].duration); 
     setIsRunning(false); 
+    localStorage.setItem('pomodoroTimer', JSON.stringify({
+      isRunning: false, time: modes[newMode].duration, mode: newMode, selectedTaskId, lastTick: Date.now()
+    }));
   };
   
   const handleSaveSettings = () => { 
@@ -210,7 +266,10 @@ export default function Pomodoro() {
             </label>
             <select
               value={selectedTaskId}
-              onChange={(e) => setSelectedTaskId(e.target.value)}
+              onChange={(e) => {
+                setSelectedTaskId(e.target.value);
+                localStorage.setItem('pomodoroTimer', JSON.stringify({ isRunning, time, mode, selectedTaskId: e.target.value, lastTick: Date.now() }));
+              }}
               disabled={isRunning} 
               className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#E5E7EB] dark:border-[#334155] rounded-[12px] text-[#111827] dark:text-white focus:outline-none focus:ring-0 focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
             >
@@ -244,7 +303,6 @@ export default function Pomodoro() {
 
           <div className="flex items-center justify-center mb-12">
             <div className="relative">
-              {/* --- ĐÃ FIX Ở ĐÂY: Thêm viewBox để SVG tự động co giãn không bị cắt xén --- */}
               <svg className="w-80 h-80 transform -rotate-90" viewBox="0 0 320 320">
                 <circle cx="160" cy="160" r="140" stroke="currentColor" className="text-[#F8FAFC] dark:text-[#0F172A]" strokeWidth="12" fill="none" />
                 <circle cx="160" cy="160" r="140" stroke={modes[mode].color} strokeWidth="12" fill="none" strokeDasharray={`${2 * Math.PI * 140}`} strokeDashoffset={`${2 * Math.PI * 140 * (1 - progress / 100)}`} strokeLinecap="round" className="transition-all duration-1000 ease-linear" />
