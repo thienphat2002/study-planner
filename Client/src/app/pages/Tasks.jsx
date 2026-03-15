@@ -41,7 +41,7 @@ export default function Tasks() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const priorityColors = { high: 'border-l-[#EF4444]', medium: 'border-l-[#F59E0B]', low: 'border-l-[#22C55E]' };
+  const priorityColors = { HIGH: 'border-l-[#EF4444]', MEDIUM: 'border-l-[#F59E0B]', LOW: 'border-l-[#22C55E]' };
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -53,10 +53,11 @@ export default function Tasks() {
     const token = localStorage.getItem('token');
     try {
       const [tasksRes, subjectsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/v1/tasks/getTask', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/v1/subjects/getSubject', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/getTask', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('https://server-production-b2e8.up.railway.app/api/v1/subjects/getSubject', { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
       const tasksData = await tasksRes.json();
+      console.log(tasksData)
       const subjectsData = await subjectsRes.json();
       if (tasksRes.ok) setRawTasks(tasksData || []);
       if (subjectsRes.ok) setSubjectsList(subjectsData.data || []); 
@@ -75,7 +76,7 @@ export default function Tasks() {
     setLoadingAdd(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/tasks/createTask', {
+      const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/createTask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
@@ -97,7 +98,7 @@ export default function Tasks() {
     setLoadingDelete(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/tasks/deleteTask/${taskToDelete.id}`, {
+      const response = await fetch(`https://server-production-b2e8.up.railway.app/api/v1/tasks/deleteTask/${taskToDelete.id}`, {
         method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -115,7 +116,7 @@ export default function Tasks() {
     const token = localStorage.getItem('token');
     const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/tasks/updateStatus/${task.id}`, {
+      const response = await fetch(`https://server-production-b2e8.up.railway.app/api/v1/tasks/updateStatus/${task.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status: newStatus })
       });
@@ -127,11 +128,11 @@ export default function Tasks() {
   const getFilteredTasks = () => {
     let result = { todo: [], inProgress: [], completed: [] };
     const filtered = rawTasks.filter(task => {
-      const priorityString = String(task.priority || 'medium');
-      const priorityLower = priorityString.toLowerCase(); 
-      const matchPriority = filterPriority === 'all' || priorityLower === filterPriority;
+      const priorityString = String(task.priority || 'MEDIUM');
+      const priorityLOWer = priorityString; 
+      const matchPriority = filterPriority === 'all' || priorityLOWer === filterPriority;
       const taskTitle = String(task.title || '');
-      const matchSearch = taskTitle.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchSearch = taskTitle.includes(searchQuery);
       return matchPriority && matchSearch;
     });
     result.todo = filtered.filter(t => t.status === 'TODO' || !t.status);
@@ -155,7 +156,7 @@ export default function Tasks() {
             <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white capitalize">
               {status === 'inProgress' ? 'In Progress' : status}
             </h3>
-            <span className="px-2 py-0.5 bg-[#F8FAFC] dark:bg-[#1E293B] rounded-full text-[12px] font-medium text-[#6B7280] dark:text-[#94A3B8]">
+            <span className="px-2 py-0.5 bg-[#F8FAFC] dark:bg-[#1E293B] rounded-full text-[12px] font-MEDIUM text-[#6B7280] dark:text-[#94A3B8]">
               {taskList.length}
             </span>
           </div>
@@ -166,16 +167,16 @@ export default function Tasks() {
           ) : (
             <div className="space-y-3">
               {taskList.map((task) => {
-                const pColor = priorityColors[task.priority?.toLowerCase()] || priorityColors.medium;
+                const pColor = priorityColors[task.priority] || priorityColors.MEDIUM;
                 return (
-                  <Card key={task.id} className={`p-3 md:p-4 border-l-4 ${pColor} hover:shadow-lg transition-shadow cursor-pointer group relative overflow-hidden`}>
+                  <Card key={task.id} className={`p-3 md:p-4 border-l-4 ${pColor} hover:shadow-lg transition-shadow cursor-pointer group relative overfLOW-hidden`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                       <div className="flex items-start sm:items-center gap-3 md:gap-4">
                         <div onClick={(e) => handleToggleStatus(task, e)} className={`mt-0.5 sm:mt-0 w-5 h-5 border-2 rounded-[4px] flex items-center justify-center transition-colors cursor-pointer flex-shrink-0 ${status === 'completed' ? 'bg-[#22C55E] border-[#22C55E]' : 'border-primary hover:bg-[#EFF6FF] dark:hover:bg-[#1e3a8a]'}`}>
                           {status === 'completed' && <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" strokeWidth={3} />}
                         </div>
                         <div>
-                          <h4 className={`text-[14px] md:text-[16px] font-medium pr-6 sm:pr-0 ${status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#111827] dark:text-white'}`}>{task.title}</h4>
+                          <h4 className={`text-[14px] md:text-[16px] font-MEDIUM pr-6 sm:pr-0 ${status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#111827] dark:text-white'}`}>{task.title}</h4>
                           <p className="text-[12px] md:text-[14px] text-[#6B7280] dark:text-[#94A3B8]">
                             {task.subject?.name || task.description || 'No subject'}
                           </p>
@@ -185,11 +186,11 @@ export default function Tasks() {
                       <div className="flex items-center justify-between sm:justify-end gap-3 md:gap-4 w-full sm:w-auto pl-8 sm:pl-0 border-t border-[#E5E7EB] dark:border-[#334155] sm:border-0 pt-2 sm:pt-0 mt-1 sm:mt-0">
                         <span className="text-[12px] md:text-[14px] text-[#6B7280] dark:text-[#94A3B8] whitespace-nowrap">Due: {formatDate(task.deadline)}</span>
                         <div className="flex items-center gap-2 md:gap-4">
-                          <span className={`px-2.5 py-1 rounded-[6px] text-[10px] md:text-[12px] font-medium whitespace-nowrap ${
-                            task.priority?.toLowerCase() === 'high' ? 'bg-[#EF4444] text-white' : 
-                            task.priority?.toLowerCase() === 'low' ? 'bg-[#22C55E] text-white' : 'bg-[#F59E0B] text-white'
+                          <span className={`px-2.5 py-1 rounded-[6px] text-[10px] md:text-[12px] font-MEDIUM whitespace-nowrap ${
+                            task.priority === 'HIGH' ? 'bg-[#EF4444] text-white' : 
+                            task.priority === 'LOW' ? 'bg-[#22C55E] text-white' : 'bg-[#F59E0B] text-white'
                           }`}>
-                            {(task.priority || 'MEDIUM').toUpperCase()}
+                            {(task.priority || 'MEDIUM')}
                           </span>
                           <button onClick={(e) => triggerDelete(task, e)} className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 dark:bg-red-500/10 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20" title="Delete Task">
                             <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -215,7 +216,7 @@ export default function Tasks() {
             <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white capitalize">
               {status === 'inProgress' ? 'In Progress' : status}
             </h3>
-            <span className="px-2 py-0.5 md:py-1 bg-[#F8FAFC] dark:bg-[#1E293B] rounded-[6px] text-[12px] md:text-[14px] font-medium text-[#6B7280] dark:text-[#94A3B8]">{taskList.length}</span>
+            <span className="px-2 py-0.5 md:py-1 bg-[#F8FAFC] dark:bg-[#1E293B] rounded-[6px] text-[12px] md:text-[14px] font-MEDIUM text-[#6B7280] dark:text-[#94A3B8]">{taskList.length}</span>
           </div>
           <div className="space-y-3">
             {taskList.map((task) => (
@@ -223,17 +224,17 @@ export default function Tasks() {
                 <button onClick={(e) => triggerDelete(task, e)} className="absolute top-2 right-2 md:top-3 md:right-3 w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full bg-white dark:bg-[#1E293B] text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-50 dark:hover:bg-red-500/20 shadow-sm border border-red-100 dark:border-red-500/30">
                   <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 </button>
-                <h4 className={`text-[14px] md:text-[16px] font-medium mb-1.5 md:mb-2 pr-6 md:pr-8 ${status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#111827] dark:text-white'}`}>{task.title}</h4>
+                <h4 className={`text-[14px] md:text-[16px] font-MEDIUM mb-1.5 md:mb-2 pr-6 md:pr-8 ${status === 'completed' ? 'text-[#94A3B8] line-through' : 'text-[#111827] dark:text-white'}`}>{task.title}</h4>
                 <p className="text-[12px] md:text-[14px] text-[#6B7280] dark:text-[#94A3B8] mb-2.5 md:mb-3 line-clamp-2">{task.subject?.name || task.description || 'No description'}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] md:text-[12px] text-[#6B7280] dark:text-[#94A3B8] flex items-center gap-1">
                     <CalendarIcon className="w-3 h-3" /> {formatDate(task.deadline)}
                   </span>
-                  <span className={`px-2 py-0.5 md:py-1 rounded-[6px] text-[10px] md:text-[12px] font-medium ${
-                    task.priority?.toLowerCase() === 'high' ? 'bg-[#FEE2E2] dark:bg-[#7f1d1d] text-[#EF4444] dark:text-[#fca5a5]' : 
-                    task.priority?.toLowerCase() === 'low' ? 'bg-[#DCFCE7] dark:bg-[#14532d] text-[#22C55E] dark:text-[#86efac]' : 
+                  <span className={`px-2 py-0.5 md:py-1 rounded-[6px] text-[10px] md:text-[12px] font-MEDIUM ${
+                    task.priority === 'HIGH' ? 'bg-[#FEE2E2] dark:bg-[#7f1d1d] text-[#EF4444] dark:text-[#fca5a5]' : 
+                    task.priority === 'LOW' ? 'bg-[#DCFCE7] dark:bg-[#14532d] text-[#22C55E] dark:text-[#86efac]' : 
                     'bg-[#FEF3C7] dark:bg-[#78350f] text-[#F59E0B] dark:text-[#fcd34d]'
-                  }`}>{(task.priority || 'MEDIUM').toUpperCase()}</span>
+                  }`}>{(task.priority || 'MEDIUM')}</span>
                 </div>
               </Card>
             ))}
@@ -249,33 +250,33 @@ export default function Tasks() {
   const renderMatrixView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <Card className="p-4 md:p-6">
-        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Urgent & Important (High)</h3>
+        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Urgent & Important (HIGH)</h3>
         <div className="space-y-2 md:space-y-3 min-h-[150px] md:min-h-[300px] content-start">
-          {filteredTasks.todo.filter(t => t.priority?.toLowerCase() === 'high').map(task => (
+          {filteredTasks.todo.filter(t => t.priority === 'HIGH').map(task => (
             <div key={task.id} className="p-2.5 md:p-3 bg-[#FEE2E2] dark:bg-[#7f1d1d]/30 border border-[#FECACA] dark:border-[#7f1d1d] rounded-[8px] hover:shadow-sm transition-shadow cursor-pointer group flex justify-between items-center">
-              <p className="text-[13px] md:text-[14px] font-medium text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
+              <p className="text-[13px] md:text-[14px] font-MEDIUM text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
               <button onClick={(e) => triggerDelete(task, e)} className="text-red-400 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 flex-shrink-0"><X className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
       </Card>
       <Card className="p-4 md:p-6">
-        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Not Urgent but Important (Medium)</h3>
+        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Not Urgent but Important (MEDIUM)</h3>
         <div className="space-y-2 md:space-y-3 min-h-[150px] md:min-h-[300px] content-start">
-          {filteredTasks.todo.filter(t => t.priority?.toLowerCase() === 'medium' || !t.priority).map(task => (
+          {filteredTasks.todo.filter(t => t.priority === 'MEDIUM' || !t.priority).map(task => (
             <div key={task.id} className="p-2.5 md:p-3 bg-[#FEF3C7] dark:bg-[#78350f]/30 border border-[#FDE68A] dark:border-[#78350f] rounded-[8px] hover:shadow-sm transition-shadow cursor-pointer group flex justify-between items-center">
-              <p className="text-[13px] md:text-[14px] font-medium text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
+              <p className="text-[13px] md:text-[14px] font-MEDIUM text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
               <button onClick={(e) => triggerDelete(task, e)} className="text-red-400 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 flex-shrink-0"><X className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
       </Card>
       <Card className="p-4 md:p-6">
-        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Urgent but Not Important (Low)</h3>
+        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#111827] dark:text-white mb-3 md:mb-4">Urgent but Not Important (LOW)</h3>
         <div className="space-y-2 md:space-y-3 min-h-[150px] md:min-h-[300px] content-start">
-           {filteredTasks.todo.filter(t => t.priority?.toLowerCase() === 'low').map(task => (
+           {filteredTasks.todo.filter(t => t.priority === 'LOW').map(task => (
             <div key={task.id} className="p-2.5 md:p-3 bg-[#DCFCE7] dark:bg-[#14532d]/30 border border-[#BBF7D0] dark:border-[#14532d] rounded-[8px] hover:shadow-sm transition-shadow cursor-pointer group flex justify-between items-center">
-              <p className="text-[13px] md:text-[14px] font-medium text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
+              <p className="text-[13px] md:text-[14px] font-MEDIUM text-[#111827] dark:text-white truncate pr-2">{task.title}</p>
               <button onClick={(e) => triggerDelete(task, e)} className="text-red-400 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 flex-shrink-0"><X className="w-4 h-4" /></button>
             </div>
           ))}
@@ -286,7 +287,7 @@ export default function Tasks() {
         <div className="space-y-2 md:space-y-3 min-h-[150px] md:min-h-[300px] content-start">
           {filteredTasks.completed.map(task => (
             <div key={task.id} className="p-2.5 md:p-3 bg-[#F8FAFC] dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] hover:shadow-sm transition-shadow cursor-pointer group flex justify-between items-center">
-              <p className="text-[13px] md:text-[14px] font-medium text-[#94A3B8] line-through truncate pr-2">{task.title}</p>
+              <p className="text-[13px] md:text-[14px] font-MEDIUM text-[#94A3B8] line-through truncate pr-2">{task.title}</p>
               <button onClick={(e) => triggerDelete(task, e)} className="text-red-400 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 flex-shrink-0"><X className="w-4 h-4" /></button>
             </div>
           ))}
@@ -303,7 +304,7 @@ export default function Tasks() {
           toast.type === 'error' ? 'bg-red-500 text-white' : toast.type === 'warning' ? 'bg-amber-500 text-white' : 'bg-[#10B981] text-white'
         }`}>
           {toast.type === 'error' ? <AlertCircle size={20} /> : toast.type === 'warning' ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
-          <span className="font-medium text-[13px] md:text-[14px] pr-2 flex-1">{toast.message}</span>
+          <span className="font-MEDIUM text-[13px] md:text-[14px] pr-2 flex-1">{toast.message}</span>
           <button onClick={() => setToast({ show: false, message: '', type: 'success' })} className="ml-auto opacity-70 hover:opacity-100"><X size={18} /></button>
         </div>
       )}
@@ -345,12 +346,12 @@ export default function Tasks() {
               <div className="absolute right-0 left-0 sm:left-auto mt-2 w-full sm:w-56 bg-white dark:bg-[#1E293B] rounded-xl shadow-xl border border-[#E5E7EB] dark:border-[#334155] z-20 py-2 animate-in fade-in">
                 <div className="px-4 py-2 text-[10px] md:text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Filter by Priority</div>
                 <div className="flex flex-col">
-                  {['all', 'high', 'medium', 'low'].map(level => {
+                  {['all', 'HIGH', 'MEDIUM', 'LOW'].map(level => {
                     const isSelected = filterPriority === level;
                     return (
                       <button key={level} onClick={() => { setFilterPriority(level); setIsFilterOpen(false); }} className={`w-full text-left px-4 py-2 md:py-2.5 text-[13px] md:text-[14px] flex items-center justify-between ${isSelected ? 'bg-[#EFF6FF] dark:bg-[#1e3a8a]/30 text-primary font-semibold' : 'text-[#475569] dark:text-[#CBD5E1]'}`}>
                         <div className="flex items-center gap-2">
-                          {level !== 'all' && <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full" style={{ backgroundColor: level === 'high' ? '#EF4444' : level === 'medium' ? '#F59E0B' : '#22C55E' }}></div>}
+                          {level !== 'all' && <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full" style={{ backgroundColor: level === 'HIGH' ? '#EF4444' : level === 'MEDIUM' ? '#F59E0B' : '#22C55E' }}></div>}
                           <span className="capitalize">{level === 'all' ? 'Show All' : level}</span>
                         </div>
                         {isSelected && <Check className="w-4 h-4 text-primary" />}
@@ -365,12 +366,12 @@ export default function Tasks() {
       </Card>
 
       {/* Tabs có cuộn ngang */}
-      <div className="flex gap-1 md:gap-2 border-b border-[#E5E7EB] dark:border-[#334155] overflow-x-auto custom-scrollbar whitespace-nowrap pb-1">
+      <div className="flex gap-1 md:gap-2 border-b border-[#E5E7EB] dark:border-[#334155] overfLOW-x-auto custom-scrollbar whitespace-nowrap pb-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 md:px-6 py-2 md:py-3 text-[14px] md:text-[16px] font-medium transition-colors border-b-2 ${activeTab === tab.id ? 'text-primary dark:text-[#60A5FA] border-primary dark:border-[#60A5FA]' : 'text-[#6B7280] dark:text-[#94A3B8] border-transparent hover:text-[#111827] dark:hover:text-white'}`}
+            className={`px-4 md:px-6 py-2 md:py-3 text-[14px] md:text-[16px] font-MEDIUM transition-colors border-b-2 ${activeTab === tab.id ? 'text-primary dark:text-[#60A5FA] border-primary dark:border-[#60A5FA]' : 'text-[#6B7280] dark:text-[#94A3B8] border-transparent hover:text-[#111827] dark:hover:text-white'}`}
           >
             {tab.label}
           </button>
@@ -407,7 +408,7 @@ export default function Tasks() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-[20px] md:rounded-3xl p-6 md:p-8 w-full max-w-[500px] shadow-2xl relative animate-in fade-in zoom-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="bg-white dark:bg-[#1E293B] rounded-[20px] md:rounded-3xl p-6 md:p-8 w-full max-w-[500px] shadow-2xl relative animate-in fade-in zoom-in max-h-[90vh] overfLOW-y-auto custom-scrollbar">
             <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 bg-gray-50 dark:bg-[#0F172A] text-gray-500 p-2 rounded-full"><X className="w-4 h-4 md:w-5 md:h-5" /></button>
             <div className="mb-5 md:mb-6 pr-8">
               <h2 className="text-[20px] md:text-[24px] font-bold dark:text-white">Create New Task</h2>
@@ -417,14 +418,14 @@ export default function Tasks() {
               <Input label="Task Title" placeholder="What needs to be done?" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <label className="block text-[13px] md:text-[14px] font-medium dark:text-white">Subject (Optional)</label>
+                  <label className="block text-[13px] md:text-[14px] font-MEDIUM dark:text-white">Subject (Optional)</label>
                   <select value={newTaskSubjectId} onChange={(e) => setNewTaskSubjectId(e.target.value)} className="w-full px-3 py-2 md:px-4 md:py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[14px] md:text-[15px] dark:text-white focus:ring-primary cursor-pointer">
                     <option value="">-- Select Subject --</option>
                     {subjectsList.map(sub => (<option key={sub.id} value={sub.id}>{sub.icon} {sub.name}</option>))}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-[13px] md:text-[14px] font-medium dark:text-white">Due Date</label>
+                  <label className="block text-[13px] md:text-[14px] font-MEDIUM dark:text-white">Due Date</label>
                   <input type="datetime-local" value={newTaskDeadline} onChange={(e) => setNewTaskDeadline(e.target.value)} className="w-full px-3 py-2 md:px-4 md:py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E5E7EB] dark:border-[#334155] rounded-[8px] text-[14px] md:text-[15px] dark:text-white focus:ring-primary dark:[color-scheme:dark]" />
                 </div>
               </div>

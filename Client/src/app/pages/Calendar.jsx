@@ -61,8 +61,8 @@ export default function Calendar() {
 
     try {
       const [subRes, schRes] = await Promise.all([
-        fetch('http://localhost:5000/api/v1/subjects/getSubject', { headers }),
-        fetch('http://localhost:5000/api/v1/schedule/all', { headers })
+        fetch('https://server-production-b2e8.up.railway.app/api/v1/subjects/getSubject', { headers }),
+        fetch('https://server-production-b2e8.up.railway.app/api/v1/schedule/all', { headers })
       ]);
       if (subRes.ok) { const subData = await subRes.json(); setSubjects(subData.data || []); }
       if (schRes.ok) { const schData = await schRes.json(); setSchedules(schData || []); }
@@ -84,7 +84,7 @@ export default function Calendar() {
     setConfirmDialog({ show: false, scheduleId: null }); 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/schedule/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch(`https://server-production-b2e8.up.railway.app/api/v1/schedule/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (response.ok) {
         setSchedules(schedules.filter(sch => sch.id !== id));
         showToast("Đã xóa lịch học thành công!", "success");
@@ -137,7 +137,7 @@ export default function Calendar() {
     setSaving(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/schedule/create', {
+      const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/schedule/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ subjectId: selectedSubject, daysOfWeek: selectedDays, startTime, endTime, room, recurrence, color: selectedColor })

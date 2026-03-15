@@ -16,7 +16,7 @@ export default function Analytics() {
     const fetchAnalytics = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/v1/analytics/overview', {
+        const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/analytics/overview', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {

@@ -72,7 +72,7 @@ export default function Pomodoro() {
     const fetchTasks = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch('http://localhost:5000/api/v1/tasks/getTask', {
+        const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/getTask', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
@@ -96,7 +96,7 @@ export default function Pomodoro() {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch('http://localhost:5000/api/v1/studySession/saveTime', {
+      const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/studySession/saveTime', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export default function Pomodoro() {
     if (!selectedTaskId) return;
     const token = localStorage.getItem('token');
     try {
-      await fetch(`http://localhost:5000/api/v1/tasks/updateStatus/${selectedTaskId}`, {
+      await fetch(`https://server-production-b2e8.up.railway.app/api/v1/tasks/updateStatus/${selectedTaskId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -283,8 +283,21 @@ export default function Pomodoro() {
             <select
               value={selectedTaskId}
               onChange={(e) => {
-                setSelectedTaskId(e.target.value);
-                localStorage.setItem('pomodoroTimer', JSON.stringify({ isRunning, time, mode, selectedTaskId: e.target.value, lastTick: Date.now() }));
+                // ĐÃ SỬA Ở ĐÂY: Reset lại time khi đổi task mới
+                const newTaskId = e.target.value;
+                const resetTime = modes[mode].duration;
+                
+                setSelectedTaskId(newTaskId);
+                setTime(resetTime);
+                setIsRunning(false);
+                
+                localStorage.setItem('pomodoroTimer', JSON.stringify({ 
+                  isRunning: false, 
+                  time: resetTime, 
+                  mode, 
+                  selectedTaskId: newTaskId, 
+                  lastTick: Date.now() 
+                }));
               }}
               disabled={isRunning} 
               className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#E5E7EB] dark:border-[#334155] rounded-[12px] text-[#111827] dark:text-white focus:outline-none focus:ring-0 focus:border-primary transition-colors cursor-pointer disabled:opacity-50"

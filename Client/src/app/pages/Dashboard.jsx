@@ -55,11 +55,12 @@ export default function Dashboard() {
 
       try {
         const [tasksRes, subjectsRes, weeklyRes, scheduleRes] = await Promise.all([
-          fetch('http://localhost:5000/api/v1/tasks/getTask', { headers }),
-          fetch('http://localhost:5000/api/v1/subjects/getSubject', { headers }),
-          fetch('http://localhost:5000/api/v1/tasks/weekly-progress', { headers }),
-          fetch('http://localhost:5000/api/v1/schedule/today', { headers }) 
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/getTask', { headers }),
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/subjects/getSubject', { headers }),
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/weekly-progress', { headers }),
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/schedule/today', { headers }) 
         ]);
+        console.log(tasksRes)
 
         let activeSubs = 0;
         let comp = 0, total = 0, prog = 0, hours = 0;
@@ -118,9 +119,9 @@ export default function Dashboard() {
   ];
 
   const priorityColors = {
-    high: 'bg-[#EF4444] text-white',
-    medium: 'bg-[#F59E0B] text-white',
-    low: 'bg-[#22C55E] text-white',
+    HIGH: 'bg-[#EF4444] text-white',
+    MEDIUM: 'bg-[#F59E0B] text-white',
+    LOW: 'bg-[#22C55E] text-white',
   };
 
   const formatDateTime = (dateString) => {
@@ -216,7 +217,11 @@ export default function Dashboard() {
               </div>
             ) : (
               realTasks.map((task) => {
-                const priorityKey = String(task.priority || 'medium').toLowerCase();
+                console.log(task.priority);
+                console.log(typeof(task.priority));
+                const priorityKey = String(task.priority || 'medium');
+                console.log(typeof(priorityKey));
+                console.log(priorityKey);
                 return (
                   <div 
                     key={task.id}
@@ -242,7 +247,7 @@ export default function Dashboard() {
                     </div>
                     <div className="w-full sm:w-auto flex justify-end mt-2 sm:mt-0">
                       <span className={`px-2.5 py-0.5 md:px-3 md:py-1 rounded-[6px] text-[10px] md:text-[12px] font-medium ${priorityColors[priorityKey] || priorityColors.medium}`}>
-                        {(task.priority || 'MEDIUM').toUpperCase()}
+                        {(task.priority || 'MEDIUM')}
                       </span>
                     </div>
                   </div>

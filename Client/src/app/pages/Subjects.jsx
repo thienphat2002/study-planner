@@ -29,7 +29,7 @@ export default function Subjects() {
     setLoadingData(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/subjects/getSubject', { headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/subjects/getSubject', { headers: { 'Authorization': `Bearer ${token}` } });
       const result = await response.json();
       if (response.ok) setSubjects(result.data || []); 
     } catch (error) { console.error("Lỗi:", error); } finally { setLoadingData(false); }
@@ -46,7 +46,7 @@ export default function Subjects() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('http://localhost:5000/api/v1/subjects/createSubject', {
+      const response = await fetch('https://server-production-b2e8.up.railway.app/api/v1/subjects/createSubject', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: subjectName.trim(), weeklyStudyHours: parseInt(targetHours) || 0, colorCode: selectedColor, icon: iconEmoji })
       });
@@ -67,7 +67,7 @@ export default function Subjects() {
     setLoadingDelete(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/subjects/deleteSubject/${subjectToDelete.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch(`https://server-production-b2e8.up.railway.app/api/v1/subjects/deleteSubject/${subjectToDelete.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (response.ok) {
         setIsDeleteModalOpen(false); setSubjectToDelete(null); fetchSubjects(); showToast("Subject deleted successfully!", "success");
       } else {

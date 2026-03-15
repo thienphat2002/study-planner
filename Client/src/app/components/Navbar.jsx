@@ -30,8 +30,8 @@ function NotificationBell() {
 
       try {
         const [tasksRes, analyticsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/v1/tasks/getTask', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/v1/analytics/overview', { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/tasks/getTask', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('https://server-production-b2e8.up.railway.app/api/v1/analytics/overview', { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
         
         let allNotis = [];
