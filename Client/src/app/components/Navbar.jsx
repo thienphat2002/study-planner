@@ -142,7 +142,8 @@ function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 sm:-right-4 top-[50px] w-[calc(100vw-2rem)] sm:w-80 md:w-96 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-[16px] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+        // ĐÃ FIX: Trên Mobile dùng "fixed left-4 right-4 top-[70px]", trên PC dùng "absolute"
+        <div className="fixed left-4 right-4 top-[70px] sm:absolute sm:left-auto sm:-right-4 sm:top-[50px] w-auto sm:w-80 md:w-96 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] shadow-2xl rounded-[16px] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] dark:border-[#334155]">
             <h3 className="font-bold text-[#111827] dark:text-white">Notifications</h3>
@@ -240,7 +241,6 @@ export default function Navbar() {
   return (
     <nav className="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E5E7EB] dark:border-[#334155] flex items-center justify-between px-4 md:px-8 fixed top-0 left-0 right-0 z-50 transition-colors duration-300">
       <div className="flex items-center gap-2 md:gap-6">
-        {/* Rút gọn tên trên mobile để không bị đè */}
         <h1 className="text-[16px] sm:text-[18px] md:text-[20px] font-semibold text-[#111827] dark:text-white transition-colors truncate max-w-[140px] sm:max-w-none">
           Smart Study Planner
         </h1>
@@ -251,7 +251,6 @@ export default function Navbar() {
         <NotificationBell />
         
         <div className="flex items-center gap-0 ml-1 md:ml-2"> 
-          {/* Profile */}
           <Link 
             to="/profile" 
             className="flex items-center gap-2 py-1.5 px-1.5 md:px-2 hover:bg-[#F8FAFC] dark:hover:bg-[#334155] rounded-[8px] transition-colors cursor-pointer"
@@ -263,7 +262,6 @@ export default function Navbar() {
                 <span className="text-[12px] md:text-[14px] font-medium text-white">{userData.avatar}</span>
               )}
             </div>
-            {/* Ẩn tên user trên mobile cực nhỏ để tiết kiệm chỗ */}
             <span className="hidden sm:block text-[14px] font-medium text-[#111827] dark:text-white pr-1 transition-colors truncate max-w-[80px] md:max-w-[150px]">
               {userData.name}
             </span>
