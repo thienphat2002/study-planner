@@ -1,4 +1,4 @@
-# Study Planner System 🎓
+# Study Planner System 
 
 > Hệ thống hỗ trợ lập kế hoạch học tập dành cho sinh viên (Dự án NCKH - ĐH Mở TP.HCM).
 
